@@ -48,6 +48,13 @@ def test_random_expressions_round_trip(seed):
         assert parse(to_source(program, spec), spec) == program
 
 
+def test_huge_integer_literal_is_a_parse_error_not_a_crash():
+    spec = generate(3)
+    with pytest.raises(ParseError) as info:
+        parse("9" * 5000, spec)
+    assert info.value.line == 1
+
+
 def test_syntax_error_reports_line_number():
     spec = generate(3)
     with pytest.raises(ParseError) as info:

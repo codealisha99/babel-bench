@@ -270,7 +270,10 @@ class _Parser:
         t = self.peek()
         if t.kind == "NUM":
             self.advance()
-            return IntLit(int(t.text))
+            try:
+                return IntLit(int(t.text))
+            except ValueError as exc:  # Python refuses to convert very long digit strings
+                raise ParseError("integer literal is too large", t.line) from exc
         if t.kind == "STR":
             self.advance()
             return StrLit(t.text)
