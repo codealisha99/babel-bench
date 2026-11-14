@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 
 from .core import (
-    Assign, Binary, BoolLit, Call, ExprStmt, FunDef, If, Index, IntLit, ListLit,
+    INT_LIMIT, Assign, Binary, BoolLit, Call, ExprStmt, FunDef, If, Index, IntLit, ListLit,
     Program, Return, StrLit, Unary, Var, While,
 )
 from .spec import LanguageSpec
@@ -271,9 +271,12 @@ class _Parser:
         if t.kind == "NUM":
             self.advance()
             try:
-                return IntLit(int(t.text))
-            except ValueError as exc:  # Python refuses to convert very long digit strings
+                value = int(t.text)  # Python refuses to convert very long digit strings
+            except ValueError as exc:
                 raise ParseError("integer literal is too large", t.line) from exc
+            if value >= INT_LIMIT:
+                raise ParseError("integer literal is too large", t.line)
+            return IntLit(value)
         if t.kind == "STR":
             self.advance()
             return StrLit(t.text)

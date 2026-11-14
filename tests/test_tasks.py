@@ -20,7 +20,7 @@ SEEDS = range(40)
 def test_suite_has_at_least_twenty_templates_across_tiers():
     ids = [t.id for t in ALL_TASKS]
     assert len(ids) == len(set(ids)) >= 20
-    assert {t.tier for t in ALL_TASKS} == {"read", "translate", "write", "fix"}
+    assert {t.tier for t in ALL_TASKS} == {"predict", "translate", "write", "fix"}
 
 
 @pytest.mark.parametrize("seed", SEEDS)
@@ -81,6 +81,6 @@ def test_translate_python_snippets_match_reference(key, _b, src, inputs):
 @pytest.mark.parametrize("seed", range(5))
 def test_naive_emitter_produces_python_for_reference_programs(seed):
     for task in ALL_TASKS:
-        if task.tier == "read":
+        if task.tier == "predict":
             continue
         compile(to_python(task.build(0)), "<naive>", "exec")

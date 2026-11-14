@@ -2,17 +2,20 @@
 
 from __future__ import annotations
 
-from ..core import IntLit, Program, Unary
+from ..core import Index, IntLit, Program, Unary
 from .base import Task
-from .dsl import at, boolean, call, fn, if_, lst, n, op, prog, ret, set_, show, text, v, while_
+from .dsl import boolean, call, fn, if_, lst, n, op, prog, ret, set_, show, text, v, while_
 
 STATEMENT = ("The program below is written in the language. Work out exactly what it prints and reply with "
              "its output, one line per printed value, and nothing else.")
 
 
 def _squares(base: int) -> Program:
+    # Negated squares divided by 3: the quotient rounds by the language's division rule.
     return prog(set_("i", n(1)),
-                while_(op("<=", v("i"), n(4)), show(op("*", v("i"), v("i"))), set_("i", op("+", v("i"), n(1)))))
+                while_(op("<=", v("i"), n(4)),
+                       show(op("/", Unary("neg", op("*", v("i"), v("i"))), IntLit(3))),
+                       set_("i", op("+", v("i"), n(1)))))
 
 
 def _division(base: int) -> Program:
@@ -29,9 +32,10 @@ def _truthiness(base: int) -> Program:
 
 
 def _indexing(base: int) -> Program:
+    # The program writes surface indices 1 and 2: they name different elements under base 0 and base 1.
     xs = lst(n(10), n(20), n(30))
-    return prog(set_("xs", xs), show(at(base, v("xs"), n(0))),
-                show(at(base, v("xs"), n(2))), show(at(base, v("xs"), n(1))))
+    return prog(set_("xs", xs), show(Index(v("xs"), IntLit(1))),
+                show(Index(v("xs"), IntLit(2))), show(Index(v("xs"), IntLit(1))))
 
 
 def _logic(base: int) -> Program:
@@ -40,10 +44,11 @@ def _logic(base: int) -> Program:
 
 
 def _recursion(base: int) -> Program:
-    return prog(fn("fact", ("k",),
-                   if_(op("<=", v("k"), n(1)), ret(n(1))),
-                   ret(op("*", v("k"), call("fact", op("-", v("k"), n(1)))))),
-                show(call("fact", n(5))))
+    # Each step adds (-k) / 2 (rounding rule) and recurses on k - 3; g(7) is -7 or -5 depending on the language.
+    return prog(fn("g", ("k",),
+                   if_(op("<=", v("k"), n(0)), ret(n(0))),
+                   ret(op("+", op("/", Unary("neg", v("k")), IntLit(2)), call("g", op("-", v("k"), n(3)))))),
+                show(call("g", n(7))))
 
 
 _CASES = (
@@ -52,6 +57,6 @@ _CASES = (
 )
 
 PREDICT_TASKS = tuple(
-    Task(id=f"predict.{key}", tier="read", title=key, statement=STATEMENT, build=builder)
+    Task(id=f"predict.{key}", tier="predict", title=key, statement=STATEMENT, build=builder)
     for key, builder in _CASES
 )

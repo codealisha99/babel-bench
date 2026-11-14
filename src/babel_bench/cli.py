@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -51,15 +52,27 @@ def _summary(path: Path) -> str:
     return "\n".join(f"  {m:<40} {p}/{t} passed" for m, (p, t) in per.items())
 
 
+def _fail(exc: Exception) -> int:
+    """Report a user-facing error on stderr and return the usage exit code."""
+    message = exc.args[0] if exc.args else exc
+    print(f"babel-bench: {message}", file=sys.stderr)
+    return 2
+
+
 def cmd_run(args) -> int:
-    cells = build_cells(args.seeds, tuple(args.tasks) if args.tasks else None)
+    if any(m.startswith("anthropic") for m in args.models) and not os.environ.get("ANTHROPIC_API_KEY"):
+        return _fail(ValueError("set ANTHROPIC_API_KEY to use the anthropic adapter"))
+    try:
+        models = [parse_model(text, _prices(args)) for text in args.models]
+        cells = build_cells(args.seeds, tuple(args.tasks) if args.tasks else None)
+    except (KeyError, ValueError) as exc:
+        return _fail(exc)
     print(f"{len(cells)} cells ({len(args.seeds)} languages x {len(cells) // len(args.seeds)} tasks)")
     out = Path(args.out)
-    for spec_text in args.models:
-        model = parse_model(spec_text, _prices(args))
+    for model in models:
         summary = run_cells(model, cells, args.attempts, out, args.concurrency)
         print(f"{model.label}: recorded {summary.recorded}, already done {summary.skipped}, "
-              f"errors {len(summary.errors)}")
+              f"model errors {len(summary.errors)}, errored cells {summary.errored}")
         for err in summary.errors[:5]:
             print(f"  error: {err}", file=sys.stderr)
     print(f"results: {out}")
@@ -68,10 +81,13 @@ def cmd_run(args) -> int:
 
 def cmd_report(args) -> int:
     records = []
-    for path in args.inputs:
-        for line in Path(path).read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                records.append(json.loads(line))
+    try:
+        for path in args.inputs:
+            for line in Path(path).read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    records.append(json.loads(line))
+    except (OSError, ValueError) as exc:
+        return _fail(exc)
     if not records:
         print("no records found", file=sys.stderr)
         return 1
@@ -104,7 +120,10 @@ def cmd_show(args) -> int:
     if args.manual:
         print(build_manual(spec).text)
     if args.task:
-        task = select((args.task,))[0]
+        try:
+            task = select((args.task,))[0]
+        except KeyError as exc:
+            return _fail(exc)
         inst = instantiate(task, spec)
         print(f"\n## {inst.task_id}: {inst.statement}\n{inst.shown}\nreference:\n{inst.oracle_answer}")
     return 0

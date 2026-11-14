@@ -13,11 +13,9 @@ from dataclasses import dataclass
 
 from .core import (
     Assign, Binary, BoolLit, Call, ExprStmt, FunDef, If, Index, IntLit, ListLit,
-    Program, Return, StrLit, Unary, Var, While, BUILTINS,
+    Program, Return, StrLit, Unary, Var, While, BUILTINS, INT_LIMIT,
 )
 from .spec import Semantics
-
-INT_LIMIT = 2**63
 
 
 @dataclass(frozen=True)
@@ -76,6 +74,15 @@ def format_value(v) -> str:
 def _trunc_div(a: int, b: int) -> int:
     q = abs(a) // abs(b)
     return q if (a < 0) == (b < 0) else -q
+
+
+def _equal(a, b) -> bool:
+    """Structural equality that keeps element kinds apart: [1] is not equal to [true]."""
+    if _kind(a) != _kind(b):
+        return False
+    if _kind(a) == "list":
+        return len(a) == len(b) and all(_equal(x, y) for x, y in zip(a, b, strict=True))
+    return a == b
 
 
 def _kind(v) -> str:
@@ -151,7 +158,7 @@ class Interpreter:
     def eval(self, e, env: dict):
         self.tick()
         if isinstance(e, IntLit):
-            return e.value
+            return self.check_int(e.value)
         if isinstance(e, BoolLit):
             return e.value
         if isinstance(e, StrLit):
@@ -195,7 +202,7 @@ class Interpreter:
         if op in ("==", "!="):
             if _kind(a) != _kind(b):
                 raise self.fail(f"cannot compare {_kind(a)} with {_kind(b)}")
-            return (a == b) == (op == "==")
+            return _equal(a, b) == (op == "==")
         if op in ("<", "<=", ">", ">="):
             if _kind(a) != _kind(b) or _kind(a) not in ("int", "string"):
                 raise self.fail(f"'{op}' needs two ints or two strings, got {_kind(a)} and {_kind(b)}")

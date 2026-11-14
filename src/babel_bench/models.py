@@ -82,7 +82,10 @@ def anthropic(model_id: str | None = None, prices: tuple | None = None) -> Model
         import anthropic as sdk  # imported lazily: only this adapter needs the SDK
 
         if not client_holder:
-            client_holder.append(sdk.Anthropic())
+            try:
+                client_holder.append(sdk.Anthropic())
+            except sdk.AnthropicError as exc:  # e.g. no API key: a model error, not a crash
+                raise ModelError(f"anthropic client could not start: {exc}") from exc
         try:
             resp = client_holder[0].messages.create(
                 model=name, max_tokens=8000, system=req.system,

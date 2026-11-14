@@ -97,3 +97,29 @@ def test_report_is_self_contained_and_escapes_answers(tmp_path):
     assert "<script>alert(1)</script>" not in html
     assert "&lt;script&gt;" in html
     assert "http://" not in html.replace("http://www.w3.org/2000/svg", "")
+
+
+def test_unexpected_exception_records_an_errored_cell_and_the_run_continues(tmp_path):
+    def fn(req: Request) -> str:
+        if "gcd" in req.prompt:
+            raise KeyError("grader bug")
+        return req.oracle_answer
+
+    out = tmp_path / "r.jsonl"
+    summary = run_cells(scripted("buggy", fn), _cells(), 1, out, 2)
+    records = [json.loads(line) for line in out.read_text().splitlines()]
+    assert len(records) == len(_cells())
+    errored = [r for r in records if "errored" in r]
+    assert summary.errored == len(errored) == len(CELLS_SEEDS)
+    assert all(r["task_id"] == "translate.gcd" and not r["passed"] for r in errored)
+    assert all(r["passed"] for r in records if "errored" not in r)
+    assert "KeyError" in errored[0]["errored"]
+    assert render_report(records)  # errored records still render
+
+
+def test_model_error_is_not_recorded_as_errored(tmp_path):
+    def fn(req: Request) -> str:
+        raise ModelError("rate limited")
+
+    summary = run_cells(scripted("limited", fn), _cells(), 1, tmp_path / "r.jsonl", 2)
+    assert summary.errored == 0 and summary.recorded == 0 and len(summary.errors) == len(_cells())

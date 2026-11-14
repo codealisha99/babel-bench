@@ -14,7 +14,7 @@ _SHOWN_HEADINGS = {
     "fix": "Buggy program",
     "translate": "Python function to translate",
     "write": "",
-    "read": "Program",
+    "predict": "Program",
 }
 
 

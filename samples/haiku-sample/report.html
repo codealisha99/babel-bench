@@ -34,10 +34,10 @@ svg text { font: 12px -apple-system, Helvetica, Arial, sans-serif; fill: var(--i
 <p class="lede">Models write and fix programs in programming languages they have never seen, using only a
 generated reference manual. Each language is derived from a seed, so no model has trained on it.</p>
 <p class="meta">1 generated language(s) &middot; 5 task(s) &middot;
-5 cell(s) &middot; generated 2026-11-14 18:50 UTC</p>
+5 cell(s) &middot; generated 2026-11-14 19:35 UTC</p>
 
 <h2>Leaderboard</h2>
-<table><thead><tr><th>Model</th><th class='num'>Passed</th><th class='num'>Score (95% CI)</th><th class='num'>Tokens</th><th class='num'>Cost</th></tr></thead><tbody><tr><td>command:claude -p --model haiku</td><td class='num'>5/5</td><td class='num'><strong>100.0%</strong> <span class='ci'>[56.6%, 100.0%]</span></td><td class='num'>5,585 (est.)</td><td class='num'>n/a</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th class='num'>Passed</th><th class='num'>Score (95% CI)</th><th class='num'>Tokens</th><th class='num'>Cost</th></tr></thead><tbody><tr><td>command:claude -p --model haiku</td><td class='num'>5/5</td><td class='num'><strong>100.0%</strong> <span class='ci'>[56.6%, 100.0%]</span></td><td class='num'>5,688 (est.)</td><td class='num'>n/a</td></tr></tbody></table>
 <p class="note">Score = share of cells passed (any attempt). Intervals are 95% Wilson intervals over cells.
 Cells are not independent across tasks within a language, so treat small differences with care.</p>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 74" width="100%" role="img" aria-label="Pass rate per model with 95% Wilson intervals"><line x1="150.0" x2="150.0" y1="14" y2="62" stroke="var(--grid)"/><text x="150.0" y="72" text-anchor="middle">0%</text><line x1="280.0" x2="280.0" y1="14" y2="62" stroke="var(--grid)"/><text x="280.0" y="72" text-anchor="middle">25%</text><line x1="410.0" x2="410.0" y1="14" y2="62" stroke="var(--grid)"/><text x="410.0" y="72" text-anchor="middle">50%</text><line x1="540.0" x2="540.0" y1="14" y2="62" stroke="var(--grid)"/><text x="540.0" y="72" text-anchor="middle">75%</text><line x1="670.0" x2="670.0" y1="14" y2="62" stroke="var(--grid)"/><text x="670.0" y="72" text-anchor="middle">100%</text><text x="140" y="33" text-anchor="end">command:claude -p --model haiku</text><rect x="150" y="20" width="520" height="18" fill="var(--grid)" rx="3"/><rect x="150" y="20" width="520.0" height="18" fill="var(--blue)" rx="3"/><line x1="444.1" x2="670.0" y1="29" y2="29" stroke="var(--ink)" stroke-width="1.5"/><text x="680" y="33">100.0%</text></svg>
@@ -68,7 +68,7 @@ Vezafra is a small imperative language. A program is a list of statements. The g
 - Booleans: `vedreebe` and `kreedena`. Integers: `0`, `42` (negative numbers use the prefix negation operator `-`). Strings: double quotes, e.g. &quot;hi&quot;.
 - Lists are written `[a, b, c]`. Values are immutable: `append` returns a new list.
 - A function that does not return a value yields `none`.
-- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`.
+- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`. Strings inside a list are in double quotes, e.g. `[&quot;a&quot;, 1]`.
 
 ## Statements
 - Assignment: `name = expression`. The first assignment inside a function creates the variable.
@@ -227,7 +227,7 @@ teevu
 
 ## Answer format
 Define a function named `solve` with the parameters described above. Reply with one fenced code block containing the complete program (top-level statements are allowed). Do not explain.
-</pre><p class='note'>Attempt 1: passed, 6/6 tests, 1141 in / 37 out tokens</p><p class='note'>Model answer</p><pre>```
+</pre><p class='note'>Attempt 1: passed, 6/6 tests, 1156 in / 37 out tokens</p><p class='note'>Model answer</p><pre>```
 budru solve(n) poutrai
   count = 1 .
   m = n .
@@ -248,7 +248,7 @@ Vezafra is a small imperative language. A program is a list of statements. The g
 - Booleans: `vedreebe` and `kreedena`. Integers: `0`, `42` (negative numbers use the prefix negation operator `-`). Strings: double quotes, e.g. &quot;hi&quot;.
 - Lists are written `[a, b, c]`. Values are immutable: `append` returns a new list.
 - A function that does not return a value yields `none`.
-- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`.
+- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`. Strings inside a list are in double quotes, e.g. `[&quot;a&quot;, 1]`.
 
 ## Statements
 - Assignment: `name = expression`. The first assignment inside a function creates the variable.
@@ -392,18 +392,18 @@ The program below is written in the language. Work out exactly what it prints an
 ```
 i = 1 .
 botu i &lt;= 4 poutrai
-  kepen(i * i) .
+  kepen(- (i * i) / 3) .
   i = i + 1 .
 teevu
 ```
 
 ## Answer format
 Reply with one fenced code block containing only the printed output.
-</pre><p class='note'>Attempt 1: passed, 1/1 tests, 1060 in / 4 out tokens</p><p class='note'>Model answer</p><pre>```
-1
-4
-9
-16
+</pre><p class='note'>Attempt 1: passed, 1/1 tests, 1078 in / 4 out tokens</p><p class='note'>Model answer</p><pre>```
+0
+-1
+-3
+-5
 ```
 </pre></details><details><summary><span class='pass'>PASS</span> translate.gcd &middot; Vezafra (seed 1) &middot; command:claude -p --model haiku &middot; 1 attempt(s)</summary><p class='note'>Prompt (attempt 1)</p><pre># Vezafra: reference manual
 # Vezafra reference manual
@@ -415,7 +415,7 @@ Vezafra is a small imperative language. A program is a list of statements. The g
 - Booleans: `vedreebe` and `kreedena`. Integers: `0`, `42` (negative numbers use the prefix negation operator `-`). Strings: double quotes, e.g. &quot;hi&quot;.
 - Lists are written `[a, b, c]`. Values are immutable: `append` returns a new list.
 - A function that does not return a value yields `none`.
-- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`.
+- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`. Strings inside a list are in double quotes, e.g. `[&quot;a&quot;, 1]`.
 
 ## Statements
 - Assignment: `name = expression`. The first assignment inside a function creates the variable.
@@ -571,7 +571,7 @@ def solve(a, b):
 
 ## Answer format
 Define a function named `solve` with the parameters described above. Reply with one fenced code block containing the complete program (top-level statements are allowed). Do not explain.
-</pre><p class='note'>Attempt 1: passed, 5/5 tests, 1116 in / 30 out tokens</p><p class='note'>Model answer</p><pre>```
+</pre><p class='note'>Attempt 1: passed, 5/5 tests, 1131 in / 30 out tokens</p><p class='note'>Model answer</p><pre>```
 budru solve(a, b) poutrai
   botu b != 0 poutrai
     t = b .
@@ -591,7 +591,7 @@ Vezafra is a small imperative language. A program is a list of statements. The g
 - Booleans: `vedreebe` and `kreedena`. Integers: `0`, `42` (negative numbers use the prefix negation operator `-`). Strings: double quotes, e.g. &quot;hi&quot;.
 - Lists are written `[a, b, c]`. Values are immutable: `append` returns a new list.
 - A function that does not return a value yields `none`.
-- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`.
+- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`. Strings inside a list are in double quotes, e.g. `[&quot;a&quot;, 1]`.
 
 ## Statements
 - Assignment: `name = expression`. The first assignment inside a function creates the variable.
@@ -737,15 +737,15 @@ Define solve(xs) returning a new list holding the elements of xs in reverse orde
 
 ## Answer format
 Define a function named `solve` with the parameters described above. Reply with one fenced code block containing the complete program (top-level statements are allowed). Do not explain.
-</pre><p class='note'>Attempt 1: passed, 4/4 tests, 1072 in / 41 out tokens</p><p class='note'>Model answer</p><pre>```
+</pre><p class='note'>Attempt 1: passed, 4/4 tests, 1087 in / 44 out tokens</p><p class='note'>Model answer</p><pre>```
 budru solve(xs) poutrai
-  out = [] .
+  result = [] .
   i = brupu(xs) - 1 .
   botu i &gt;= 0 poutrai
-    out = trimai(out, xs[i]) .
+    result = trimai(result, xs[i]) .
     i = i - 1 .
   teevu
-  kezvai out .
+  kezvai result .
 teevu
 ```
 </pre></details><details><summary><span class='pass'>PASS</span> write.sum_to &middot; Vezafra (seed 1) &middot; command:claude -p --model haiku &middot; 1 attempt(s)</summary><p class='note'>Prompt (attempt 1)</p><pre># Vezafra: reference manual
@@ -758,7 +758,7 @@ Vezafra is a small imperative language. A program is a list of statements. The g
 - Booleans: `vedreebe` and `kreedena`. Integers: `0`, `42` (negative numbers use the prefix negation operator `-`). Strings: double quotes, e.g. &quot;hi&quot;.
 - Lists are written `[a, b, c]`. Values are immutable: `append` returns a new list.
 - A function that does not return a value yields `none`.
-- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`.
+- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`. Strings inside a list are in double quotes, e.g. `[&quot;a&quot;, 1]`.
 
 ## Statements
 - Assignment: `name = expression`. The first assignment inside a function creates the variable.
@@ -904,9 +904,15 @@ Define solve(n) returning 1 + 2 + ... + n for a non-negative integer n (0 when n
 
 ## Answer format
 Define a function named `solve` with the parameters described above. Reply with one fenced code block containing the complete program (top-level statements are allowed). Do not explain.
-</pre><p class='note'>Attempt 1: passed, 6/6 tests, 1068 in / 16 out tokens</p><p class='note'>Model answer</p><pre>```
+</pre><p class='note'>Attempt 1: passed, 6/6 tests, 1084 in / 37 out tokens</p><p class='note'>Model answer</p><pre>```
 budru solve(n) poutrai
-  kezvai n * (n + 1) / 2 .
+  total = 0 .
+  i = 1 .
+  botu i &lt;= n poutrai
+    total = total + i .
+    i = i + 1 .
+  teevu
+  kezvai total .
 teevu
 ```
 </pre></details>

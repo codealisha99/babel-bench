@@ -29,7 +29,8 @@ class Cell:
 class RunSummary:
     recorded: int
     skipped: int
-    errors: tuple
+    errors: tuple  # model errors: cells left unrecorded, retried on rerun
+    errored: int = 0  # unexpected exceptions: recorded as errored cells, not retried
 
 
 def build_cells(seeds: tuple, task_ids: tuple | None) -> tuple:
@@ -97,11 +98,24 @@ def _cell_record(model: Model, cell: Cell, log: list) -> dict:
     }
 
 
+def _errored_record(model: Model, cell: Cell, exc: Exception) -> dict:
+    """One unexpected exception must not abort the run: the cell is recorded as errored and counts as failed."""
+    inst = cell.instance
+    return {
+        "model": model.label, "seed": cell.spec.seed, "language": cell.spec.name,
+        "features": cell.spec.features(), "task_id": inst.task_id, "tier": inst.tier,
+        "kind": inst.kind, "title": inst.title, "passed": False, "attempts_used": 0, "attempts": [],
+        "input_tokens": 0, "output_tokens": 0, "cost_usd": None, "estimated": False,
+        "errored": f"{type(exc).__name__}: {exc}",
+        "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+
+
 def run_cells(model: Model, cells: tuple, attempts: int, out_path: Path, concurrency: int = 4) -> RunSummary:
     done = load_done(out_path)
     todo = [c for c in cells if (model.label, c.spec.seed, c.instance.task_id) not in done]
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    recorded, errors = 0, []
+    recorded, errored, errors = 0, 0, []
     with ThreadPoolExecutor(max_workers=max(1, concurrency)) as pool, \
             out_path.open("a", encoding="utf-8") as fh:
         futures = {pool.submit(evaluate, model, c, attempts): c for c in todo}
@@ -112,7 +126,10 @@ def run_cells(model: Model, cells: tuple, attempts: int, out_path: Path, concurr
             except ModelError as exc:
                 errors.append(f"{cell.spec.name} {cell.instance.task_id}: {exc}")
                 continue
+            except Exception as exc:  # per-cell guard: a bug in grading or an adapter ends one cell only
+                record = _errored_record(model, cell, exc)
+                errored += 1
             fh.write(json.dumps(record) + "\n")
             fh.flush()
             recorded += 1
-    return RunSummary(recorded, len(cells) - len(todo), tuple(errors))
+    return RunSummary(recorded, len(cells) - len(todo), tuple(errors), errored)

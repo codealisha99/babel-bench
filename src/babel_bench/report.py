@@ -138,8 +138,8 @@ def _leaderboard(summary: dict) -> str:
 
 
 def _tier_table(summary: dict) -> str:
-    tiers = ("read", "translate", "write", "fix")
-    labels = {"read": "Predict output", "translate": "Translate", "write": "Write", "fix": "Fix"}
+    tiers = ("predict", "translate", "write", "fix")
+    labels = {"predict": "Predict output", "translate": "Translate", "write": "Write", "fix": "Fix"}
     head = "".join(f"<th class='num'>{_esc(m)}</th>" for m in summary)
     rows = []
     for tier in tiers:
@@ -205,10 +205,13 @@ def _drilldown(records: list) -> str:
         head = (f"<summary><span class='{status}'>{'PASS' if r['passed'] else 'FAIL'}</span> "
                 f"{_esc(r['task_id'])} &middot; {_esc(r['language'])} (seed {r['seed']}) &middot; "
                 f"{_esc(r['model'])} &middot; {r['attempts_used']} attempt(s)</summary>")
-        first = r["attempts"][0]
-        prompt = f"<p class='note'>Prompt (attempt 1)</p><pre>{_esc(first['prompt'])}</pre>"
-        attempts = "".join(_attempt_html(a) for a in r["attempts"])
-        items.append(f"<details>{head}{prompt}{attempts}</details>")
+        if r.get("errored"):  # no attempts were made: show the unexpected error instead
+            body = f"<p class='note'>Errored cell: {_esc(r['errored'])}</p>"
+        else:
+            first = r["attempts"][0]
+            prompt = f"<p class='note'>Prompt (attempt 1)</p><pre>{_esc(first['prompt'])}</pre>"
+            body = prompt + "".join(_attempt_html(a) for a in r["attempts"])
+        items.append(f"<details>{head}{body}</details>")
     return "".join(items)
 
 

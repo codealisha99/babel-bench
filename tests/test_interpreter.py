@@ -65,3 +65,21 @@ def test_if_uses_truthiness_of_zero():
     assert run_program(prog, CANONICAL).output == ("false",)
     zero_true = Semantics(0, "floor", "floor", False, True, False)
     assert run_program(prog, zero_true).output == ("true",)
+
+
+def test_lists_compare_element_kinds_not_python_equality():
+    same = Program((_show(Binary("==", ListLit((IntLit(1),)), ListLit((BoolLit(True),)))),))
+    assert run_program(same, CANONICAL).text == "false"
+    different = Program((_show(Binary("!=", ListLit((IntLit(1),)), ListLit((BoolLit(True),)))),))
+    assert run_program(different, CANONICAL).text == "true"
+    nested = Program((_show(Binary("==", ListLit((ListLit((IntLit(0),)),)), ListLit((ListLit((BoolLit(False),)),)))),))
+    assert run_program(nested, CANONICAL).text == "false"
+    equal = Program((_show(Binary("==", ListLit((IntLit(1), IntLit(2))), ListLit((IntLit(1), IntLit(2))))),))
+    assert run_program(equal, CANONICAL).text == "true"
+
+
+def test_integer_literal_at_the_bound_is_an_error():
+    prog = Program((_show(IntLit(2**63)),))
+    result = run_program(prog, CANONICAL)
+    assert result.error is not None and "integer overflow" in result.error.message
+    assert run_program(Program((_show(IntLit(2**63 - 1)),)), CANONICAL).error is None

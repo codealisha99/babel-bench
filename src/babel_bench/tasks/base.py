@@ -28,7 +28,7 @@ class TaskBroken(RuntimeError):
 @dataclass(frozen=True)
 class Task:
     id: str
-    tier: str  # read (predict), translate, write, fix
+    tier: str  # predict, translate, write, fix
     title: str
     statement: str
     build: Callable[[int], Program]  # base -> reference program
@@ -76,7 +76,7 @@ def _fenced(code: str, tag: str = "") -> str:
 def instantiate(task: Task, spec: LanguageSpec) -> Instance:
     base, sem = spec.semantics.index_base, spec.semantics
     ref = task.build(base)
-    if task.tier == "read":
+    if task.tier == "predict":
         result = run_program(ref, sem)
         if result.error:
             raise TaskBroken(f"{task.id} in {spec.name}: {result.error}")

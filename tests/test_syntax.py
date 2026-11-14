@@ -55,6 +55,12 @@ def test_huge_integer_literal_is_a_parse_error_not_a_crash():
     assert info.value.line == 1
 
 
+def test_literal_at_the_integer_bound_is_a_parse_error():
+    spec = generate(3)
+    with pytest.raises(ParseError, match="too large"):
+        parse(f"{2**63}", spec)
+
+
 def test_syntax_error_reports_line_number():
     spec = generate(3)
     with pytest.raises(ParseError) as info:

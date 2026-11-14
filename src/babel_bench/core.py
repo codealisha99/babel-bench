@@ -14,6 +14,8 @@ from dataclasses import dataclass, field
 UNARY_OPS = ("neg", "not")
 BINARY_OPS = ("or", "and", "==", "!=", "<", "<=", ">", ">=", "+", "-", "*", "/", "%")
 BUILTINS = {"len": 1, "append": 2, "str": 1, "print": 1}
+# Integers have magnitude below 2**63. Literals and arithmetic results must respect this bound.
+INT_LIMIT = 2**63
 
 
 @dataclass(frozen=True)
