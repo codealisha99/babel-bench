@@ -131,12 +131,16 @@ def build_manual(spec: LanguageSpec) -> Manual:
         f"prefix negation operator `{sx.ops['neg']}`). Strings: double quotes, e.g. \"hi\".",
         "- Lists are written `[a, b, c]`. Values are immutable: `append` returns a new list.",
         "- A function that does not return a value yields `none`.",
-        "- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`.",
+        "- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`. "
+        "Strings inside a list are in double quotes, e.g. `[\"a\", 1]`.",
         "",
         "## Statements",
         f"- Assignment: `name {sx.assign} expression`. The first assignment inside a function creates the variable.",
         f"- Blocks start with `{open_tok}` and end with `{close_tok}`. Statements inside a block follow the same rules.",
         f"- Statement endings: {end}.",
+        *([f"- In a newline-ended language a block opener must be on the same line as its statement, and "
+           f"`{kw['else']}` must be on the same line as the `{close_tok}` that closes the `if` block."]
+          if spec.newline_mode else []),
         "- Identifiers are plain letters, digits and underscores (not starting with a digit).",
         "",
         "## Operators and precedence",
