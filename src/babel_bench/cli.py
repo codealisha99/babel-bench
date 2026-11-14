@@ -28,6 +28,13 @@ def parse_seeds(text: str) -> tuple:
     return tuple(dict.fromkeys(seeds))
 
 
+def parse_attempts(text: str) -> int:
+    value = int(text)
+    if value < 1:
+        raise argparse.ArgumentTypeError("attempts must be at least 1")
+    return value
+
+
 def _prices(args) -> tuple | None:
     if args.price_in is None or args.price_out is None:
         return None
@@ -118,7 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--model", dest="models", action="append", required=True,
                      help="oracle | naive | anthropic[:id] | openai:<url>|<model> | command:<shell>")
     run.add_argument("--task", dest="tasks", action="append", help="task id or tier (repeatable)")
-    run.add_argument("--attempts", type=int, default=1)
+    run.add_argument("--attempts", type=parse_attempts, default=1)
     run.add_argument("--concurrency", type=int, default=4)
     run.add_argument("--out", default="runs/results.jsonl")
     run.add_argument("--price-in", type=float, help="USD per million input tokens")
