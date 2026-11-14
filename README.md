@@ -5,6 +5,8 @@
 **Landing page:** https://babel-bench-site.vercel.app
 **Live demo:** the playground on the landing page, backed by the API at https://babel-bench-api.vercel.app (a Vercel Python function). The first attempt to host it on Railway was blocked by an expired trial, so it runs on Vercel instead.
 
+![The playground: a generated language manual, an editor with an error on line 2, and the interpreter message](docs/playground.png)
+
 **A coding and reasoning benchmark built on programming languages that did not exist until the run.**
 SWE-bench-style suites leak into training data and saturate. babel-bench generates a brand-new language
 from a seed (its keywords, block delimiters, operator spellings, precedence, call style, indexing base,
