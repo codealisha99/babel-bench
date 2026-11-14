@@ -58,3 +58,15 @@ def test_starter_endpoint():
     assert ok.status_code == 200 and ok.json()["program"]
     assert client.get("/api/languages/1/tasks/predict.squares/starter").status_code == 400
     assert client.get("/api/languages/1/tasks/nope/starter").status_code == 404
+
+
+def test_playground_bundle_has_manual_and_parseable_starters():
+    from babel_bench.showcase import PLAYGROUND_SEED, playground_bundle
+
+    bundle = playground_bundle()
+    spec = generate(PLAYGROUND_SEED)
+    assert bundle["seed"] == PLAYGROUND_SEED and bundle["manual"]
+    runnable = [t["id"] for t in bundle["tasks"] if t["runnable"]]
+    assert "write.sum_to" in runnable
+    for task_id in runnable:
+        parse(bundle["starters"][task_id], spec)

@@ -233,13 +233,16 @@ function renderManual(text) {
 
 // ---------- language and tasks
 
+let language = null;   // the loaded language: { seed, name, manual, tasks, starters? }
+let lastStarter = "";  // the starter currently in the editor; the visitor's own edits are never replaced
+
 function renderTasks(tasks) {
   el.task.replaceChildren(...tasks.map((t) => {
     const opt = el_("option", "", t.runnable ? t.id : `${t.id} (read only)`);
     opt.value = t.id;
     return opt;
   }));
-  const first = tasks.find((t) => t.runnable) || tasks[0];
+  const first = tasks.find((t) => t.id === "write.sum_to") || tasks.find((t) => t.runnable) || tasks[0];
   el.task.value = first.id;
   el.task.disabled = false;
   showTask();
@@ -261,12 +264,45 @@ function showTask() {
   el.editorHead.hidden = !writing;
   el.editor.hidden = !writing;
   el.runRow.hidden = !writing;
-  el.starterNote.hidden = true;
   el.starter.disabled = !writing;
   el.program.disabled = !writing;
   el.run.disabled = !writing;
   el.program.placeholder = writing ? "Write your program here, or press Show me a starter." : "";
+  if (!writing) el.starterNote.hidden = true;
   updateGutter();
+  const untouched = !el.program.value.trim() || el.program.value === lastStarter;
+  if (writing && untouched) prefillStarter().catch((err) => setStatus(`Could not get a starter: ${err.message}`));
+}
+
+function starterNote(t) {
+  return t.tier === "fix"
+    ? "This is the buggy program from the task. Find the bug and reply with the whole corrected program."
+    : "A skeleton: every function header is in place and each body returns 0. Fill in the body; it does not solve the task.";
+}
+
+// Puts the task's starter in the editor: from the precomputed bundle when there is one, else from the API.
+async function prefillStarter() {
+  const t = tasksById[el.task.value];
+  if (!t || !t.runnable || !language) return;
+  const cached = language.starters && language.starters[t.id];
+  const program = cached !== undefined
+    ? cached
+    : (await getJSON(`/api/languages/${language.seed}/tasks/${encodeURIComponent(t.id)}/starter`)).program;
+  if (el.task.value !== t.id) return; // the visitor has moved to another task meanwhile
+  el.program.value = program;
+  lastStarter = program;
+  updateGutter();
+  clearResult();
+  el.starterNote.textContent = starterNote(t);
+  el.starterNote.hidden = false;
+}
+
+function applyLanguage(data) {
+  language = data;
+  el.langName.textContent = `${data.name}, seed ${data.seed}`;
+  renderManual(data.manual);
+  tasksById = Object.fromEntries(data.tasks.map((t) => [t.id, t]));
+  renderTasks(data.tasks);
 }
 
 async function loadLanguage() {
@@ -285,10 +321,7 @@ async function loadLanguage() {
       getJSON(`/api/languages/${seed}`),
       getJSON(`/api/languages/${seed}/tasks`),
     ]);
-    el.langName.textContent = `${lang.name}, seed ${lang.seed}`;
-    renderManual(lang.manual);
-    tasksById = Object.fromEntries(listing.tasks.map((t) => [t.id, t]));
-    renderTasks(listing.tasks);
+    applyLanguage({ seed: lang.seed, name: lang.name, manual: lang.manual, tasks: listing.tasks });
     history.replaceState(null, "", `?seed=${seed}#playground`);
   } catch (err) {
     el.langName.textContent = "";
@@ -297,6 +330,18 @@ async function loadLanguage() {
     clearTimeout(slow);
     el.load.disabled = false;
     el.roll.disabled = false;
+  }
+}
+
+// Seed 1 is preloaded from static JSON on page load, so the playground is ready without an API call.
+async function loadBundledLanguage() {
+  try {
+    const res = await fetch("data/playground.json");
+    if (!res.ok) throw new Error(`status ${res.status}`);
+    applyLanguage(await res.json());
+  } catch (err) {
+    el.langName.textContent = "";
+    setStatus("Seed 1 did not preload. Press Load language to try again.");
   }
 }
 
@@ -346,19 +391,11 @@ function goToLine(line) {
 
 async function insertStarter() {
   const t = tasksById[el.task.value];
-  const seed = currentSeed();
-  if (!t || !t.runnable || seed === null) return;
-  if (el.program.value.trim() && !window.confirm("Replace your program with a starter?")) return;
+  if (!t || !t.runnable || !language) return;
+  if (el.program.value.trim() && el.program.value !== lastStarter && !window.confirm("Replace your program with a starter?")) return;
   el.starter.disabled = true;
   try {
-    const data = await getJSON(`/api/languages/${seed}/tasks/${encodeURIComponent(t.id)}/starter`);
-    el.program.value = data.program;
-    updateGutter();
-    clearResult();
-    el.starterNote.textContent = t.tier === "fix"
-      ? "This is the buggy program from the task. Find the bug and reply with the whole corrected program."
-      : "A skeleton: every function header is in place and each body returns 0. Fill in the body; it does not solve the task.";
-    el.starterNote.hidden = false;
+    await prefillStarter();
     el.program.focus();
   } catch (err) {
     setStatus(`Could not get a starter: ${err.message}`);
@@ -500,3 +537,4 @@ const requested = seedFromURL();
 if (requested !== null) el.seed.value = String(requested);
 loadShowcase();
 if (requested !== null) loadLanguage();
+else loadBundledLanguage();

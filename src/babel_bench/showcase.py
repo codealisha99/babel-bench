@@ -3,7 +3,9 @@
 Every source line and output comes from the generator, printer and interpreter the benchmark uses,
 so the page never shows a hand-written example. Run from the repository root:
 
-    uv run python -m babel_bench.showcase site/data/showcase.json
+    uv run python -m babel_bench.showcase site/data
+
+writes showcase.json (hero and rules matrix) and playground.json (seed 1 preloaded in the playground).
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ import json
 import sys
 from pathlib import Path
 
+from .api import views
 from .core import Unary
 from .interp import run_program
 from .printer import to_source
@@ -74,14 +77,30 @@ def build() -> dict:
     }
 
 
+PLAYGROUND_SEED = 1
+
+
+def playground_bundle(seed: int = PLAYGROUND_SEED) -> dict:
+    """What the playground shows on page load: the manual, the task list, and each task's starter.
+
+    Built from the same views the API serves, so it matches /api/languages/{seed} exactly.
+    """
+    lang = views.language(seed)
+    listing = views.tasks(seed)
+    starters = {t["id"]: views.starter(seed, t["id"]) for t in listing["tasks"] if t["tier"] != "predict"}
+    return {"seed": seed, "name": lang["name"], "manual": lang["manual"], "tasks": listing["tasks"], "starters": starters}
+
+
 def main(argv: list | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     if len(args) != 1:
-        print("usage: python -m babel_bench.showcase OUT.json", file=sys.stderr)
+        print("usage: python -m babel_bench.showcase OUT_DIR", file=sys.stderr)
         return 2
-    Path(args[0]).parent.mkdir(parents=True, exist_ok=True)
-    Path(args[0]).write_text(json.dumps(build(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"wrote {args[0]}")
+    out = Path(args[0])
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "showcase.json").write_text(json.dumps(build(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (out / "playground.json").write_text(json.dumps(playground_bundle(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"wrote {out / 'showcase.json'} and {out / 'playground.json'}")
     return 0
 
 

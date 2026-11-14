@@ -1,0 +1,537 @@
+{
+  "seed": 1,
+  "name": "Vezafra",
+  "manual": "# Vezafra reference manual\n\nVezafra is a small imperative language. A program is a list of statements. The grader calls the function `budru solve(...)` with arguments and prints the value it returns.\n\n## Words and values\n- Function definition: `budru`. Conditionals: `glugi` / `supine`. Loops: `botu`. Return: `kezvai`.\n- Booleans: `vedreebe` and `kreedena`. Integers: `0`, `42` (negative numbers use the prefix negation operator `-`). Strings: double quotes, e.g. \"hi\".\n- Lists are written `[a, b, c]`. Values are immutable: `append` returns a new list.\n- A function that does not return a value yields `none`.\n- Printed values: integers as digits, booleans as `true`/`false`, strings as-is, lists as `[a, b]`. Strings inside a list are in double quotes, e.g. `[\"a\", 1]`.\n\n## Statements\n- Assignment: `name = expression`. The first assignment inside a function creates the variable.\n- Blocks start with `poutrai` and end with `teevu`. Statements inside a block follow the same rules.\n- Statement endings: each simple statement ends with `.`.\n- Identifiers are plain letters, digits and underscores (not starting with a digit).\n\n## Operators and precedence\n- Negation: `-x`. Logical not: `!x`. Both bind tighter than any binary operator.\n- Binary operators, lowest binding first (same line = same precedence, grouped left to right):\n1. `||`\n2. `+`, `-`\n3. `&&`\n4. `==`, `!=`, `<`, `<=`, `>`, `>=`\n5. `*`, `/`, `%`\n- Calls and indexing bind tightest of all.\n- Parentheses group as usual.\n\n## Calls\n- A call is written `name(arg, ...)`. Built-in and user-defined functions use the same form.\n\n## Indexing\n- `xs[i]` reads an element. Indices start at **0**: the first element is `xs[0]`, the last is `xs[0 + len(xs) - 1]`.\n- Indexing outside the valid range is a runtime error.\n\n## Truthiness\n- `kreedena`, `vedreebe`: as written. `none`: false.\n- The integer 0 is false. An empty list or empty string is false. Any other integer is true.\n\n## Integer arithmetic\n- `/` on integers rounds toward zero: `-7 / 2` evaluates to -3.\n- `%` takes the sign of the divisor: `-7 % 3` evaluates to 2, and `7 % -3` evaluates to -2.\n- Division or modulo by zero is a runtime error. `+` also joins two strings.\n\n## and / or\n- `and` and `or` short-circuit. They return a boolean: `0 or 5` evaluates to true, `vedreebe and 0` evaluates to false.\n\n## Built-in functions\n- `brupu(x)`: number of items in a list or characters in a string.\n- `trimai(xs, v)`: a new list with `v` added at the end.\n- `briree(x)`: the printed form of `x` as a string.\n- `kepen(x)`: prints `x` on its own line.\n\n## Limits\n- Programs get a bounded number of steps, a bounded call depth and bounded list and string sizes. Exceeding a limit (for example an infinite loop) is an error.\n\n## Worked examples (executed when this manual was generated)\n\n### Integer division and modulo\n```\nkepen(- 7 / 2) .\nkepen(- 7 % 3) .\nkepen(7 / - 2) .\nkepen(7 % - 3) .\n```\nOutput:\n```\n-3\n2\n-3\n-2\n```\n\n### Operator precedence\n```\nkepen(2 + 3 * 4) .\nkepen(1 == (0 + 1)) .\n```\nOutput:\n```\n14\ntrue\n```\n\n### Truthiness in conditions\n```\nglugi 0 poutrai\n  kepen(\"zero is true\") .\nteevu supine poutrai\n  kepen(\"zero is false\") .\nteevu\nglugi[] poutrai\n  kepen(\"empty list is true\") .\nteevu supine poutrai\n  kepen(\"empty list is false\") .\nteevu\n```\nOutput:\n```\nzero is false\nempty list is false\n```\n\n### Indexing\n```\nxs = [10, 20, 30] .\nkepen(xs[0]) .\nkepen(xs[2]) .\n```\nOutput:\n```\n10\n30\n```\n\n### and / or\n```\nkepen(0 || 5) .\nkepen(vedreebe && 0) .\n```\nOutput:\n```\ntrue\nfalse\n```\n\n### Functions, loops and calls\n```\nbudru add(a, b) poutrai\n  kezvai a + b .\nteevu\nacc = 0 .\ni = 1 .\nbotu i <= 3 poutrai\n  acc = acc + i .\n  i = i + 1 .\nteevu\nkepen(acc) .\nkepen(add(2, 3)) .\n```\nOutput:\n```\n6\n5\n```\n",
+  "tasks": [
+    {
+      "id": "predict.squares",
+      "tier": "predict",
+      "title": "squares",
+      "statement": "The program below is written in the language. Work out exactly what it prints and reply with its output, one line per printed value, and nothing else.",
+      "kind": "predict",
+      "runnable": false,
+      "shown": "i = 1 .\nbotu i <= 4 poutrai\n  kepen(- (i * i) / 3) .\n  i = i + 1 .\nteevu\n",
+      "visible": [],
+      "hidden_tests": 0
+    },
+    {
+      "id": "predict.division",
+      "tier": "predict",
+      "title": "division",
+      "statement": "The program below is written in the language. Work out exactly what it prints and reply with its output, one line per printed value, and nothing else.",
+      "kind": "predict",
+      "runnable": false,
+      "shown": "kepen(- 7 / 2) .\nkepen(- 7 % 3) .\nkepen(7 / - 2) .\nkepen(7 % - 3) .\n",
+      "visible": [],
+      "hidden_tests": 0
+    },
+    {
+      "id": "predict.truthiness",
+      "tier": "predict",
+      "title": "truthiness",
+      "statement": "The program below is written in the language. Work out exactly what it prints and reply with its output, one line per printed value, and nothing else.",
+      "kind": "predict",
+      "runnable": false,
+      "shown": "glugi 0 poutrai\n  kepen(\"A\") .\nteevu supine poutrai\n  kepen(\"B\") .\nteevu\nglugi[] poutrai\n  kepen(\"C\") .\nteevu supine poutrai\n  kepen(\"D\") .\nteevu\nglugi \"\" poutrai\n  kepen(\"E\") .\nteevu supine poutrai\n  kepen(\"F\") .\nteevu\n",
+      "visible": [],
+      "hidden_tests": 0
+    },
+    {
+      "id": "predict.indexing",
+      "tier": "predict",
+      "title": "indexing",
+      "statement": "The program below is written in the language. Work out exactly what it prints and reply with its output, one line per printed value, and nothing else.",
+      "kind": "predict",
+      "runnable": false,
+      "shown": "xs = [10, 20, 30] .\nkepen(xs[1]) .\nkepen(xs[2]) .\nkepen(xs[1]) .\n",
+      "visible": [],
+      "hidden_tests": 0
+    },
+    {
+      "id": "predict.logic",
+      "tier": "predict",
+      "title": "logic",
+      "statement": "The program below is written in the language. Work out exactly what it prints and reply with its output, one line per printed value, and nothing else.",
+      "kind": "predict",
+      "runnable": false,
+      "shown": "kepen(0 || 5) .\nkepen(vedreebe && 0) .\nkepen(1 && 2) .\nkepen(kreedena || kreedena) .\n",
+      "visible": [],
+      "hidden_tests": 0
+    },
+    {
+      "id": "predict.recursion",
+      "tier": "predict",
+      "title": "recursion",
+      "statement": "The program below is written in the language. Work out exactly what it prints and reply with its output, one line per printed value, and nothing else.",
+      "kind": "predict",
+      "runnable": false,
+      "shown": "budru g(k) poutrai\n  glugi k <= 0 poutrai\n    kezvai 0 .\n  teevu\n  kezvai - k / 2 + g(k - 3) .\nteevu\nkepen(g(7)) .\n",
+      "visible": [],
+      "hidden_tests": 0
+    },
+    {
+      "id": "translate.gcd",
+      "tier": "translate",
+      "title": "gcd",
+      "statement": "Rewrite the Python function below in the language so that it behaves identically. Use only the language's own constructs and conventions.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "def solve(a, b):\n    while b != 0:\n        t = b\n        b = a % b\n        a = t\n    return a\n",
+      "visible": [
+        {
+          "args": [
+            "12",
+            "18"
+          ],
+          "expected": "6"
+        },
+        {
+          "args": [
+            "7",
+            "0"
+          ],
+          "expected": "7"
+        }
+      ],
+      "hidden_tests": 3
+    },
+    {
+      "id": "translate.power",
+      "tier": "translate",
+      "title": "power",
+      "statement": "Rewrite the Python function below in the language so that it behaves identically. Use only the language's own constructs and conventions.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "def solve(b, e):\n    r = 1\n    i = 0\n    while i < e:\n        r = r * b\n        i = i + 1\n    return r\n",
+      "visible": [
+        {
+          "args": [
+            "2",
+            "10"
+          ],
+          "expected": "1024"
+        },
+        {
+          "args": [
+            "3",
+            "0"
+          ],
+          "expected": "1"
+        }
+      ],
+      "hidden_tests": 4
+    },
+    {
+      "id": "translate.sum_digits",
+      "tier": "translate",
+      "title": "sum digits",
+      "statement": "Rewrite the Python function below in the language so that it behaves identically. Use only the language's own constructs and conventions.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "def solve(n):\n    s = 0\n    while n != 0:\n        s = s + n % 10\n        n = n // 10\n    return s\n",
+      "visible": [
+        {
+          "args": [
+            "1234"
+          ],
+          "expected": "10"
+        },
+        {
+          "args": [
+            "0"
+          ],
+          "expected": "0"
+        }
+      ],
+      "hidden_tests": 3
+    },
+    {
+      "id": "translate.sum_list",
+      "tier": "translate",
+      "title": "sum list",
+      "statement": "Rewrite the Python function below in the language so that it behaves identically. Use only the language's own constructs and conventions.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "def solve(xs):\n    total = 0\n    i = 0\n    while i < len(xs):\n        total = total + xs[i]\n        i = i + 1\n    return total\n",
+      "visible": [
+        {
+          "args": [
+            "[1, 2, 3]"
+          ],
+          "expected": "6"
+        },
+        {
+          "args": [
+            "[]"
+          ],
+          "expected": "0"
+        }
+      ],
+      "hidden_tests": 2
+    },
+    {
+      "id": "translate.clamp",
+      "tier": "translate",
+      "title": "clamp",
+      "statement": "Rewrite the Python function below in the language so that it behaves identically. Use only the language's own constructs and conventions.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "def solve(x, lo, hi):\n    if x < lo:\n        return lo\n    if x > hi:\n        return hi\n    return x\n",
+      "visible": [
+        {
+          "args": [
+            "-5",
+            "0",
+            "10"
+          ],
+          "expected": "0"
+        },
+        {
+          "args": [
+            "3",
+            "0",
+            "10"
+          ],
+          "expected": "3"
+        }
+      ],
+      "hidden_tests": 2
+    },
+    {
+      "id": "translate.collatz_steps",
+      "tier": "translate",
+      "title": "collatz steps",
+      "statement": "Rewrite the Python function below in the language so that it behaves identically. Use only the language's own constructs and conventions.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "def solve(n):\n    steps = 0\n    while n != 1:\n        if n % 2 == 0:\n            n = n // 2\n        else:\n            n = 3 * n + 1\n        steps = steps + 1\n    return steps\n",
+      "visible": [
+        {
+          "args": [
+            "1"
+          ],
+          "expected": "0"
+        },
+        {
+          "args": [
+            "6"
+          ],
+          "expected": "8"
+        }
+      ],
+      "hidden_tests": 3
+    },
+    {
+      "id": "write.sum_to",
+      "tier": "write",
+      "title": "sum to",
+      "statement": "Define solve(n) returning 1 + 2 + ... + n for a non-negative integer n (0 when n is 0).",
+      "kind": "code",
+      "runnable": true,
+      "shown": "",
+      "visible": [
+        {
+          "args": [
+            "5"
+          ],
+          "expected": "15"
+        },
+        {
+          "args": [
+            "0"
+          ],
+          "expected": "0"
+        }
+      ],
+      "hidden_tests": 4
+    },
+    {
+      "id": "write.count_digits",
+      "tier": "write",
+      "title": "count digits",
+      "statement": "Define solve(n) returning how many decimal digits the non-negative integer n has (0 has one digit).",
+      "kind": "code",
+      "runnable": true,
+      "shown": "",
+      "visible": [
+        {
+          "args": [
+            "7"
+          ],
+          "expected": "1"
+        },
+        {
+          "args": [
+            "10"
+          ],
+          "expected": "2"
+        }
+      ],
+      "hidden_tests": 4
+    },
+    {
+      "id": "write.max_of",
+      "tier": "write",
+      "title": "max of",
+      "statement": "Define solve(xs) returning the largest element of the non-empty list xs. Lists may contain negative numbers.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "",
+      "visible": [
+        {
+          "args": [
+            "[3, 1, 4]"
+          ],
+          "expected": "4"
+        },
+        {
+          "args": [
+            "[-3, -7]"
+          ],
+          "expected": "-3"
+        }
+      ],
+      "hidden_tests": 4
+    },
+    {
+      "id": "write.is_prime",
+      "tier": "write",
+      "title": "is prime",
+      "statement": "Define solve(n) returning true if the non-negative integer n is prime, otherwise false. 0 and 1 are not prime.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "",
+      "visible": [
+        {
+          "args": [
+            "4"
+          ],
+          "expected": "false"
+        },
+        {
+          "args": [
+            "0"
+          ],
+          "expected": "false"
+        }
+      ],
+      "hidden_tests": 5
+    },
+    {
+      "id": "write.bsearch",
+      "tier": "write",
+      "title": "bsearch",
+      "statement": "Define solve(xs, t). xs is a list of distinct integers sorted ascending. Return the 0-based position of t in xs, or -1 if t is absent. The answer is always 0-based, whatever the language's index base.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "",
+      "visible": [
+        {
+          "args": [
+            "[1, 3, 5, 7]",
+            "5"
+          ],
+          "expected": "2"
+        },
+        {
+          "args": [
+            "[1, 3, 5, 7]",
+            "1"
+          ],
+          "expected": "0"
+        }
+      ],
+      "hidden_tests": 5
+    },
+    {
+      "id": "write.reverse",
+      "tier": "write",
+      "title": "reverse",
+      "statement": "Define solve(xs) returning a new list holding the elements of xs in reverse order.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "",
+      "visible": [
+        {
+          "args": [
+            "[1, 2, 3]"
+          ],
+          "expected": "[3, 2, 1]"
+        },
+        {
+          "args": [
+            "[]"
+          ],
+          "expected": "[]"
+        }
+      ],
+      "hidden_tests": 2
+    },
+    {
+      "id": "fix.sum_to",
+      "tier": "fix",
+      "title": "sum to",
+      "statement": "Define solve(n) returning 1 + 2 + ... + n for a non-negative integer n (0 when n is 0). The program shown below was meant to do this but has one bug; reply with the complete corrected program.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "budru solve(n) poutrai\n  acc = 0 .\n  i = 1 .\n  botu i < n poutrai\n    acc = acc + i .\n    i = i + 1 .\n  teevu\n  kezvai acc .\nteevu\n",
+      "visible": [
+        {
+          "args": [
+            "5"
+          ],
+          "expected": "15"
+        },
+        {
+          "args": [
+            "0"
+          ],
+          "expected": "0"
+        }
+      ],
+      "hidden_tests": 4
+    },
+    {
+      "id": "fix.count_digits",
+      "tier": "fix",
+      "title": "count digits",
+      "statement": "Define solve(n) returning how many decimal digits the non-negative integer n has (0 has one digit). The program shown below was meant to do this but has one bug; reply with the complete corrected program.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "budru solve(n) poutrai\n  count = 1 .\n  m = n .\n  botu m > 10 poutrai\n    m = m / 10 .\n    count = count + 1 .\n  teevu\n  kezvai count .\nteevu\n",
+      "visible": [
+        {
+          "args": [
+            "7"
+          ],
+          "expected": "1"
+        },
+        {
+          "args": [
+            "10"
+          ],
+          "expected": "2"
+        }
+      ],
+      "hidden_tests": 4
+    },
+    {
+      "id": "fix.max_of",
+      "tier": "fix",
+      "title": "max of",
+      "statement": "Define solve(xs) returning the largest element of the non-empty list xs. Lists may contain negative numbers. The program shown below was meant to do this but has one bug; reply with the complete corrected program.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "budru solve(xs) poutrai\n  best = 0 .\n  i = 1 .\n  botu i < brupu(xs) poutrai\n    glugi xs[i] > best poutrai\n      best = xs[i] .\n    teevu\n    i = i + 1 .\n  teevu\n  kezvai best .\nteevu\n",
+      "visible": [
+        {
+          "args": [
+            "[3, 1, 4]"
+          ],
+          "expected": "4"
+        },
+        {
+          "args": [
+            "[-3, -7]"
+          ],
+          "expected": "-3"
+        }
+      ],
+      "hidden_tests": 4
+    },
+    {
+      "id": "fix.is_prime",
+      "tier": "fix",
+      "title": "is prime",
+      "statement": "Define solve(n) returning true if the non-negative integer n is prime, otherwise false. 0 and 1 are not prime. The program shown below was meant to do this but has one bug; reply with the complete corrected program.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "budru solve(n) poutrai\n  glugi n < 2 poutrai\n    kezvai kreedena .\n  teevu\n  d = 2 .\n  botu d * d < n poutrai\n    glugi n % d == 0 poutrai\n      kezvai kreedena .\n    teevu\n    d = d + 1 .\n  teevu\n  kezvai vedreebe .\nteevu\n",
+      "visible": [
+        {
+          "args": [
+            "4"
+          ],
+          "expected": "false"
+        },
+        {
+          "args": [
+            "0"
+          ],
+          "expected": "false"
+        }
+      ],
+      "hidden_tests": 5
+    },
+    {
+      "id": "fix.bsearch",
+      "tier": "fix",
+      "title": "bsearch",
+      "statement": "Define solve(xs, t). xs is a list of distinct integers sorted ascending. Return the 0-based position of t in xs, or -1 if t is absent. The answer is always 0-based, whatever the language's index base. The program shown below was meant to do this but has one bug; reply with the complete corrected program.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "budru solve(xs, t) poutrai\n  lo = 0 .\n  hi = brupu(xs) - 1 .\n  botu lo <= hi poutrai\n    mid = (lo + hi) / 2 .\n    x = xs[mid] .\n    glugi x == t poutrai\n      kezvai mid .\n    teevu\n    glugi x < t poutrai\n      lo = mid + 1 .\n    teevu supine poutrai\n      hi = mid .\n    teevu\n  teevu\n  kezvai - 1 .\nteevu\n",
+      "visible": [
+        {
+          "args": [
+            "[1, 3, 5, 7]",
+            "5"
+          ],
+          "expected": "2"
+        },
+        {
+          "args": [
+            "[1, 3, 5, 7]",
+            "1"
+          ],
+          "expected": "0"
+        }
+      ],
+      "hidden_tests": 5
+    },
+    {
+      "id": "fix.reverse",
+      "tier": "fix",
+      "title": "reverse",
+      "statement": "Define solve(xs) returning a new list holding the elements of xs in reverse order. The program shown below was meant to do this but has one bug; reply with the complete corrected program.",
+      "kind": "code",
+      "runnable": true,
+      "shown": "budru solve(xs) poutrai\n  out = [] .\n  i = brupu(xs) .\n  botu i >= 0 poutrai\n    out = trimai(out, xs[i]) .\n    i = i - 1 .\n  teevu\n  kezvai out .\nteevu\n",
+      "visible": [
+        {
+          "args": [
+            "[1, 2, 3]"
+          ],
+          "expected": "[3, 2, 1]"
+        },
+        {
+          "args": [
+            "[]"
+          ],
+          "expected": "[]"
+        }
+      ],
+      "hidden_tests": 2
+    }
+  ],
+  "starters": {
+    "translate.gcd": "budru solve(a, b) poutrai\n  kezvai 0 .\nteevu\n",
+    "translate.power": "budru solve(b, e) poutrai\n  kezvai 0 .\nteevu\n",
+    "translate.sum_digits": "budru solve(n) poutrai\n  kezvai 0 .\nteevu\n",
+    "translate.sum_list": "budru solve(xs) poutrai\n  kezvai 0 .\nteevu\n",
+    "translate.clamp": "budru solve(x, lo, hi) poutrai\n  kezvai 0 .\nteevu\n",
+    "translate.collatz_steps": "budru solve(n) poutrai\n  kezvai 0 .\nteevu\n",
+    "write.sum_to": "budru solve(n) poutrai\n  kezvai 0 .\nteevu\n",
+    "write.count_digits": "budru solve(n) poutrai\n  kezvai 0 .\nteevu\n",
+    "write.max_of": "budru solve(xs) poutrai\n  kezvai 0 .\nteevu\n",
+    "write.is_prime": "budru solve(n) poutrai\n  kezvai 0 .\nteevu\n",
+    "write.bsearch": "budru solve(xs, t) poutrai\n  kezvai 0 .\nteevu\n",
+    "write.reverse": "budru solve(xs) poutrai\n  kezvai 0 .\nteevu\n",
+    "fix.sum_to": "budru solve(n) poutrai\n  acc = 0 .\n  i = 1 .\n  botu i < n poutrai\n    acc = acc + i .\n    i = i + 1 .\n  teevu\n  kezvai acc .\nteevu\n",
+    "fix.count_digits": "budru solve(n) poutrai\n  count = 1 .\n  m = n .\n  botu m > 10 poutrai\n    m = m / 10 .\n    count = count + 1 .\n  teevu\n  kezvai count .\nteevu\n",
+    "fix.max_of": "budru solve(xs) poutrai\n  best = 0 .\n  i = 1 .\n  botu i < brupu(xs) poutrai\n    glugi xs[i] > best poutrai\n      best = xs[i] .\n    teevu\n    i = i + 1 .\n  teevu\n  kezvai best .\nteevu\n",
+    "fix.is_prime": "budru solve(n) poutrai\n  glugi n < 2 poutrai\n    kezvai kreedena .\n  teevu\n  d = 2 .\n  botu d * d < n poutrai\n    glugi n % d == 0 poutrai\n      kezvai kreedena .\n    teevu\n    d = d + 1 .\n  teevu\n  kezvai vedreebe .\nteevu\n",
+    "fix.bsearch": "budru solve(xs, t) poutrai\n  lo = 0 .\n  hi = brupu(xs) - 1 .\n  botu lo <= hi poutrai\n    mid = (lo + hi) / 2 .\n    x = xs[mid] .\n    glugi x == t poutrai\n      kezvai mid .\n    teevu\n    glugi x < t poutrai\n      lo = mid + 1 .\n    teevu supine poutrai\n      hi = mid .\n    teevu\n  teevu\n  kezvai - 1 .\nteevu\n",
+    "fix.reverse": "budru solve(xs) poutrai\n  out = [] .\n  i = brupu(xs) .\n  botu i >= 0 poutrai\n    out = trimai(out, xs[i]) .\n    i = i - 1 .\n  teevu\n  kezvai out .\nteevu\n"
+  }
+}
