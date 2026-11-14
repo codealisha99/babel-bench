@@ -1,0 +1,685 @@
+{
+  "task": {
+    "id": "predict.squares",
+    "statement": "The program below is written in the language. Work out exactly what it prints and reply with its output, one line per printed value, and nothing else."
+  },
+  "feature_seeds": [
+    1,
+    2,
+    3
+  ],
+  "languages": [
+    {
+      "seed": 1,
+      "name": "Vezafra",
+      "features": {
+        "index base": "0-based",
+        "terminator": "semicolon-style",
+        "blocks": "keyword pair",
+        "call style": "prefix",
+        "integer division": "rounds toward zero",
+        "modulo sign": "follows divisor",
+        "zero is": "false",
+        "empty collection is": "false",
+        "and/or result": "boolean",
+        "precedence": "permuted"
+      },
+      "program": "i = 1 .\nbotu i <= 4 poutrai\n  kepen(- (i * i) / 3) .\n  i = i + 1 .\nteevu\n",
+      "output": "0\n-1\n-3\n-5",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "kepen(- 7 / 2) .\n",
+          "output": "-3"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "kepen(- 7 % 3) .\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "kepen([\"first\", \"second\"] [0]) .\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "glugi 0 poutrai\n  kepen(\"true\") .\nteevu supine poutrai\n  kepen(\"false\") .\nteevu\n",
+          "output": "false"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "kepen(0 || 5) .\n",
+          "output": "true"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "kepen(2 + 3 * 4) .\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 2,
+      "name": "Plakri",
+      "features": {
+        "index base": "1-based",
+        "terminator": "semicolon-style",
+        "blocks": "keyword pair",
+        "call style": "postfix",
+        "integer division": "rounds down",
+        "modulo sign": "follows divisor",
+        "zero is": "false",
+        "empty collection is": "true",
+        "and/or result": "operand",
+        "precedence": "permuted"
+      },
+      "program": "i := 1 $\nskedre i =< 4 meesete\n  (~ (i * i) / 3) saiskee $\n  i := i + 1 $\nbuskee\n",
+      "output": "-1\n-2\n-3\n-6",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "(~ 7 / 2) saiskee $\n",
+          "output": "-4"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "(~ 7 % 3) saiskee $\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "([\"first\", \"second\"] [1]) saiskee $\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "krivoulo 0 meesete\n  (\"true\") saiskee $\nbuskee ribrumee meesete\n  (\"false\") saiskee $\nbuskee\n",
+          "output": "false"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "(0 | 5) saiskee $\n",
+          "output": "5"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "(2 + 3 * 4) saiskee $\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 3,
+      "name": "Veleeni",
+      "features": {
+        "index base": "0-based",
+        "terminator": "newline",
+        "blocks": "braces",
+        "call style": "postfix",
+        "integer division": "rounds down",
+        "modulo sign": "follows dividend",
+        "zero is": "true",
+        "empty collection is": "false",
+        "and/or result": "operand",
+        "precedence": "canonical"
+      },
+      "program": "i = 1\nsoureekra i =< 4 {\n  (- (i * i) / 3) mutre\n  i = i + 1\n}\n",
+      "output": "-1\n-2\n-3\n-6",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "(- 7 / 2) mutre\n",
+          "output": "-4"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "(- 7 % 3) mutre\n",
+          "output": "-1"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "([\"first\", \"second\"] [0]) mutre\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "kouzvi 0 {\n  (\"true\") mutre\n} traikeru {\n  (\"false\") mutre\n}\n",
+          "output": "true"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "(0 || 5) mutre\n",
+          "output": "0"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "(2 + 3 * 4) mutre\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 4,
+      "name": "Leeza",
+      "features": {
+        "index base": "0-based",
+        "terminator": "newline",
+        "blocks": "braces",
+        "call style": "prefix",
+        "integer division": "rounds toward zero",
+        "modulo sign": "follows divisor",
+        "zero is": "false",
+        "empty collection is": "false",
+        "and/or result": "operand",
+        "precedence": "permuted"
+      },
+      "program": "i := 1\nreekeefree i =< 4 {\n  skibo(~ (i * i) / 3)\n  i := i + 1\n}\n",
+      "output": "0\n-1\n-3\n-5",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "skibo(~ 7 / 2)\n",
+          "output": "-3"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "skibo(~ 7 % 3)\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "skibo([\"first\", \"second\"] [0])\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "gleetaibro 0 {\n  skibo(\"true\")\n} glififou {\n  skibo(\"false\")\n}\n",
+          "output": "false"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "skibo(0 || 5)\n",
+          "output": "5"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "skibo(2 + 3 * 4)\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 5,
+      "name": "Drougubu",
+      "features": {
+        "index base": "0-based",
+        "terminator": "semicolon-style",
+        "blocks": "braces",
+        "call style": "postfix",
+        "integer division": "rounds toward zero",
+        "modulo sign": "follows divisor",
+        "zero is": "true",
+        "empty collection is": "false",
+        "and/or result": "operand",
+        "precedence": "canonical"
+      },
+      "program": "i = 1 $\ndreevuni i <= 4 {\n  (~ (i * i) / 3) suzibrai $\n  i = i + 1 $\n}\n",
+      "output": "0\n-1\n-3\n-5",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "(~ 7 / 2) suzibrai $\n",
+          "output": "-3"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "(~ 7 % 3) suzibrai $\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "([\"first\", \"second\"] [0]) suzibrai $\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "doupetro 0 {\n  (\"true\") suzibrai $\n} pletro {\n  (\"false\") suzibrai $\n}\n",
+          "output": "true"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "(0 skiplaibrai 5) suzibrai $\n",
+          "output": "0"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "(2 + 3 * 4) suzibrai $\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 6,
+      "name": "Glazvu",
+      "features": {
+        "index base": "0-based",
+        "terminator": "semicolon-style",
+        "blocks": "keyword pair",
+        "call style": "prefix",
+        "integer division": "rounds down",
+        "modulo sign": "follows divisor",
+        "zero is": "false",
+        "empty collection is": "false",
+        "and/or result": "operand",
+        "precedence": "permuted"
+      },
+      "program": "i := 1 $\nbreeri i =< 4 gosovou\n  geeka(~ (i * i) / 3) $\n  i := i + 1 $\nlouse\n",
+      "output": "-1\n-2\n-3\n-6",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "geeka(~ 7 / 2) $\n",
+          "output": "-4"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "geeka(~ 7 % 3) $\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "geeka([\"first\", \"second\"] [0]) $\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "tibeeta 0 gosovou\n  geeka(\"true\") $\nlouse poubremou gosovou\n  geeka(\"false\") $\nlouse\n",
+          "output": "false"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "geeka(0 lolapai 5) $\n",
+          "output": "5"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "geeka(2 + (3 * 4)) $\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 7,
+      "name": "Gleedi",
+      "features": {
+        "index base": "0-based",
+        "terminator": "newline",
+        "blocks": "keyword pair",
+        "call style": "prefix",
+        "integer division": "rounds toward zero",
+        "modulo sign": "follows divisor",
+        "zero is": "true",
+        "empty collection is": "false",
+        "and/or result": "boolean",
+        "precedence": "canonical"
+      },
+      "program": "i := 1\nmeleplou i =< 4 pelou\n  feeneerai(~ (i * i) / 3)\n  i := i + 1\nvatrusu\n",
+      "output": "0\n-1\n-3\n-5",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "feeneerai(~ 7 / 2)\n",
+          "output": "-3"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "feeneerai(~ 7 % 3)\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "feeneerai([\"first\", \"second\"] [0])\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "plukou 0 pelou\n  feeneerai(\"true\")\nvatrusu feebree pelou\n  feeneerai(\"false\")\nvatrusu\n",
+          "output": "true"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "feeneerai(0 | 5)\n",
+          "output": "true"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "feeneerai(2 + 3 * 4)\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 8,
+      "name": "Bazai",
+      "features": {
+        "index base": "1-based",
+        "terminator": "newline",
+        "blocks": "braces",
+        "call style": "prefix",
+        "integer division": "rounds down",
+        "modulo sign": "follows divisor",
+        "zero is": "true",
+        "empty collection is": "true",
+        "and/or result": "boolean",
+        "precedence": "permuted"
+      },
+      "program": "i := 1\nrukabai i <= 4 {\n  rufreebree(- (i * i) / 3)\n  i := i + 1\n}\n",
+      "output": "-1\n-2\n-3\n-6",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "rufreebree(- 7 / 2)\n",
+          "output": "-4"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "rufreebree(- 7 % 3)\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "rufreebree([\"first\", \"second\"] [1])\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "fupabrai 0 {\n  rufreebree(\"true\")\n} begladu {\n  rufreebree(\"false\")\n}\n",
+          "output": "true"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "rufreebree(0 || 5)\n",
+          "output": "true"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "rufreebree(2 + (3 * 4))\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 9,
+      "name": "Skouzakree",
+      "features": {
+        "index base": "1-based",
+        "terminator": "semicolon-style",
+        "blocks": "keyword pair",
+        "call style": "prefix",
+        "integer division": "rounds down",
+        "modulo sign": "follows dividend",
+        "zero is": "true",
+        "empty collection is": "false",
+        "and/or result": "boolean",
+        "precedence": "canonical"
+      },
+      "program": "i <- 1 $\nfuzvi i <= 4 zvafro\n  noupi(~ (i * i) / 3) $\n  i <- i + 1 $\npezvofre\n",
+      "output": "-1\n-2\n-3\n-6",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "noupi(~ 7 / 2) $\n",
+          "output": "-4"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "noupi(~ 7 % 3) $\n",
+          "output": "-1"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "noupi([\"first\", \"second\"] [1]) $\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "fouglee 0 zvafro\n  noupi(\"true\") $\npezvofre voufra zvafro\n  noupi(\"false\") $\npezvofre\n",
+          "output": "true"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "noupi(0 | 5) $\n",
+          "output": "true"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "noupi(2 + 3 * 4) $\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 10,
+      "name": "Resugee",
+      "features": {
+        "index base": "1-based",
+        "terminator": "semicolon-style",
+        "blocks": "braces",
+        "call style": "prefix",
+        "integer division": "rounds toward zero",
+        "modulo sign": "follows divisor",
+        "zero is": "false",
+        "empty collection is": "false",
+        "and/or result": "operand",
+        "precedence": "permuted"
+      },
+      "program": "i = 1 $\nbeekee i =< 4 {\n  nenik(~ (i * i) / 3) $\n  i = i + 1 $\n}\n",
+      "output": "0\n-1\n-3\n-5",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "nenik(~ 7 / 2) $\n",
+          "output": "-3"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "nenik(~ 7 % 3) $\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "nenik([\"first\", \"second\"] [1]) $\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "gouvaibrai 0 {\n  nenik(\"true\") $\n} frazvai {\n  nenik(\"false\") $\n}\n",
+          "output": "false"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "nenik(0 || 5) $\n",
+          "output": "5"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "nenik(2 + 3 * 4) $\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 11,
+      "name": "Glufega",
+      "features": {
+        "index base": "1-based",
+        "terminator": "semicolon-style",
+        "blocks": "keyword pair",
+        "call style": "postfix",
+        "integer division": "rounds toward zero",
+        "modulo sign": "follows divisor",
+        "zero is": "true",
+        "empty collection is": "true",
+        "and/or result": "boolean",
+        "precedence": "permuted"
+      },
+      "program": "i := 1 $\ndoumee i =< 4 nobai\n  (~ (i * i) / 3) skaku $\n  i := i + 1 $\ngaifo\n",
+      "output": "0\n-1\n-3\n-5",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "(~ 7 / 2) skaku $\n",
+          "output": "-3"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "(~ 7 trudai 3) skaku $\n",
+          "output": "2"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "([\"first\", \"second\"] [1]) skaku $\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "paidruki 0 nobai\n  (\"true\") skaku $\ngaifo metraro nobai\n  (\"false\") skaku $\ngaifo\n",
+          "output": "true"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "(0 || 5) skaku $\n",
+          "output": "true"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "(2 + 3 * 4) skaku $\n",
+          "output": "14"
+        }
+      ]
+    },
+    {
+      "seed": 12,
+      "name": "Logou",
+      "features": {
+        "index base": "1-based",
+        "terminator": "semicolon-style",
+        "blocks": "keyword pair",
+        "call style": "prefix",
+        "integer division": "rounds toward zero",
+        "modulo sign": "follows dividend",
+        "zero is": "true",
+        "empty collection is": "false",
+        "and/or result": "operand",
+        "precedence": "canonical"
+      },
+      "program": "i := 1 ;\nmakazve i =< 4 duskaifra\n  gabree(- (i * i) / 3) ;\n  i := i + 1 ;\nbaideesu\n",
+      "output": "0\n-1\n-3\n-5",
+      "probes": [
+        {
+          "id": "division",
+          "label": "Integer division of -7 by 2",
+          "source": "gabree(- 7 / 2) ;\n",
+          "output": "-3"
+        },
+        {
+          "id": "modulo",
+          "label": "Modulo of -7 by 3",
+          "source": "gabree(- 7 zesemi 3) ;\n",
+          "output": "-1"
+        },
+        {
+          "id": "index",
+          "label": "First item of a two-item list",
+          "source": "gabree([\"first\", \"second\"] [1]) ;\n",
+          "output": "first"
+        },
+        {
+          "id": "zero",
+          "label": "Is 0 true or false?",
+          "source": "teefrazou 0 duskaifra\n  gabree(\"true\") ;\nbaideesu likoupe duskaifra\n  gabree(\"false\") ;\nbaideesu\n",
+          "output": "true"
+        },
+        {
+          "id": "logic",
+          "label": "0 or 5",
+          "source": "gabree(0 tigle 5) ;\n",
+          "output": "0"
+        },
+        {
+          "id": "precedence",
+          "label": "2 + 3 * 4, as printed",
+          "source": "gabree(2 + 3 * 4) ;\n",
+          "output": "14"
+        }
+      ]
+    }
+  ]
+}
