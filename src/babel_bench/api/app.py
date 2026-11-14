@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from fastapi import Depends, FastAPI, HTTPException, Path, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
@@ -19,6 +21,9 @@ class RunRequest(BaseModel):
     program: str = Field(min_length=1)
 
 
+ON_VERCEL = bool(os.environ.get("VERCEL"))  # set by the Vercel runtime, never by a client
+
+
 def create_app(settings: Settings) -> FastAPI:
     app = FastAPI(title="babel-bench playground", docs_url=None, redoc_url=None, openapi_url=None)
     reads = RateLimiter(settings.reads_per_minute)
@@ -27,7 +32,8 @@ def create_app(settings: Settings) -> FastAPI:
 
     def limit(limiter: RateLimiter):
         def check(request: Request) -> None:
-            key = client_ip(request.headers, request.client.host if request.client else None)
+            key = client_ip(request.headers, request.client.host if request.client else None,
+                            on_vercel=ON_VERCEL)
             if not limiter.allow(key):
                 raise HTTPException(429, "too many requests, slow down", headers={"Retry-After": "60"})
         return check

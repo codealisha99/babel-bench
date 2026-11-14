@@ -144,3 +144,13 @@ def test_rate_limiter_window_slides():
     assert limiter.allow("a") and not limiter.allow("a")
     now[0] = 10.0
     assert limiter.allow("a")
+
+
+def test_on_vercel_the_platform_ip_header_is_used():
+    headers = {"x-vercel-forwarded-for": "7.7.7.7", "x-forwarded-for": "1.1.1.1"}
+    assert client_ip(headers, "10.0.0.1", on_vercel=True) == "7.7.7.7"
+
+
+def test_platform_ip_header_is_ignored_off_vercel():
+    headers = {"x-vercel-forwarded-for": "7.7.7.7", "x-forwarded-for": "1.1.1.1"}
+    assert client_ip(headers, "10.0.0.1", on_vercel=False) == "1.1.1.1"

@@ -85,12 +85,17 @@ class ConcurrencyGate:
             self._sem.release()
 
 
-def client_ip(headers: Mapping, peer: str | None) -> str:
-    """The client as seen by the edge proxy: the last X-Forwarded-For entry, since the proxy appends.
+def client_ip(headers: Mapping, peer: str | None, on_vercel: bool = False) -> str:
+    """The client IP as the edge proxy saw it.
 
-    Assumes exactly one trusted proxy hop in front of the app (Railway's edge). A client can add
-    earlier entries but cannot change the last one.
+    On Vercel, x-vercel-forwarded-for is set by the platform. It is trusted only when VERCEL is set,
+    because elsewhere a client could send it to dodge the rate limit. Otherwise use the last
+    X-Forwarded-For entry, since the proxy appends to it; this assumes one trusted proxy hop.
     """
+    if on_vercel:
+        platform_ip = headers.get("x-vercel-forwarded-for", "").strip()
+        if platform_ip:
+            return platform_ip
     forwarded = headers.get("x-forwarded-for", "")
     last = forwarded.split(",")[-1].strip() if forwarded else ""
     return last or peer or "unknown"

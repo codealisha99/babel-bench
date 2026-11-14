@@ -6,8 +6,13 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 MAX_WORKER_BYTES = 64_000
+# -I ignores PYTHONPATH, so the child finds the package through an explicit path. This works both
+# in the Docker image (package installed) and on Vercel (only the source tree is in the bundle).
+SRC_DIR = str(Path(__file__).resolve().parents[2])
+_BOOTSTRAP = "import runpy, sys; sys.path.insert(0, sys.argv[1]); runpy.run_module(sys.argv[2], run_name='__main__')"
 
 
 class SandboxTimeout(RuntimeError):
@@ -23,7 +28,7 @@ def run_grade(request: dict, timeout_s: float) -> dict:
     # the working directory, and the child gets an empty environment apart from PATH.
     try:
         proc = subprocess.run(
-            [sys.executable, "-I", "-m", "babel_bench.api.worker"],
+            [sys.executable, "-I", "-c", _BOOTSTRAP, SRC_DIR, "babel_bench.api.worker"],
             input=json.dumps(request).encode("utf-8"), capture_output=True,
             timeout=timeout_s, check=False, env={"PATH": os.environ.get("PATH", "/usr/bin:/bin")},
         )

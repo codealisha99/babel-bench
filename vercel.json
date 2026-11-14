@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 20
+    }
+  },
+  "env": {
+    "BABEL_ALLOWED_ORIGINS": "https://babel-bench-site.vercel.app"
+  }
+}
