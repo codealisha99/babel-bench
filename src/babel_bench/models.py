@@ -112,7 +112,12 @@ def openai_compatible(base_url: str, model_id: str, prices: tuple | None = None)
                 data = json.load(fh)
         except OSError as exc:
             raise ModelError(f"openai-compatible call failed: {exc}") from exc
-        text = data["choices"][0]["message"]["content"] or ""
+        except ValueError as exc:  # body is not JSON
+            raise ModelError(f"openai-compatible reply is not JSON: {exc}") from exc
+        try:
+            text = data["choices"][0]["message"]["content"] or ""
+        except (KeyError, IndexError, TypeError) as exc:
+            raise ModelError(f"openai-compatible reply has no message content: {exc}") from exc
         usage = data.get("usage") or {}
         return Completion(text, usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0))
 
@@ -123,8 +128,11 @@ def command(shell_cmd: str, prices: tuple | None = None) -> Model:
     """Pipe system+prompt to any shell command on stdin; the answer is its stdout."""
     def answer(req: Request) -> Completion:
         stdin = req.system + "\n\n" + req.prompt
-        proc = subprocess.run(shell_cmd, shell=True, input=stdin, capture_output=True,
-                              text=True, timeout=900, check=False)
+        try:
+            proc = subprocess.run(shell_cmd, shell=True, input=stdin, capture_output=True,
+                                  text=True, timeout=900, check=False)
+        except subprocess.TimeoutExpired as exc:
+            raise ModelError(f"command timed out after {exc.timeout}s") from exc
         if proc.returncode != 0:
             raise ModelError(f"command exited {proc.returncode}: {proc.stderr.strip()[:500]}")
         est_in, est_out = _estimate(stdin, proc.stdout)
