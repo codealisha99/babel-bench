@@ -16,10 +16,10 @@ Z95 = 1.959963984540054
 
 CSS = """
 :root { color-scheme: light; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
-  --grid:#e1e0d9; --axis:#c3c2b7; --blue:#2a78d6; --blue-soft:#cde2fb; --blue-deep:#104281; }
+  --grid:#e1e0d9; --axis:#c3c2b7; --blue:#2a78d6; --blue-soft:#cde2fb; --blue-deep:#104281; --track:#efeee9; }
 @media (prefers-color-scheme: dark) { :root { color-scheme: dark; --surface:#1a1a19; --ink:#f0efec;
   --ink2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835; --blue:#3987e5; --blue-soft:#1c5cab;
-  --blue-deep:#9ec5f4; } }
+  --blue-deep:#9ec5f4; --track:#252523; } }
 * { box-sizing: border-box; }
 body { margin:0; background:var(--surface); color:var(--ink);
   font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
@@ -40,7 +40,10 @@ summary { cursor: pointer; font-variant-numeric: tabular-nums; }
 pre { background: rgba(0,0,0,0.04); padding: 10px 12px; border-radius: 6px; overflow-x: auto;
   font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; }
 .note { color: var(--ink2); font-size: 13px; }
-svg text { font: 12px -apple-system, Helvetica, Arial, sans-serif; fill: var(--ink2); }
+svg text { font: 13px -apple-system, Helvetica, Arial, sans-serif; fill: var(--ink2); }
+svg rect.track { fill: var(--track); } svg rect.bar { fill: var(--blue); }
+svg line.whisker { stroke: var(--ink); stroke-width: 1.5; } svg line.gridline { stroke: var(--grid); }
+svg text.ink { fill: var(--ink); } svg text.muted { fill: var(--muted); font-size: 12px; }
 """
 
 
@@ -93,31 +96,39 @@ def _summarise(records: list) -> dict:
 
 
 def _bar_chart(summary: dict) -> str:
-    width, row, left, right = 760, 34, 150, 90
+    """Pass rate per model: one ink-free blue bar per row, direct value labels, 95% interval whisker."""
+    width, row, top, bar = 760, 40, 8, 18
+    left, right = 170, 170
     scale = width - left - right
-    rows = []
+    axis_y = top + row * len(summary) + 4
+    height = axis_y + 46
+    marks = []
     for i, (model, s) in enumerate(summary.items()):
-        y = 20 + i * row
+        y = top + i * row
+        mid = y + bar / 2
         rate = s["passes"] / s["total"] if s["total"] else 0
         lo, hi = wilson_interval(s["passes"], s["total"])
-        x_rate = left + rate * scale
-        rows.append(
-            f'<text x="{left - 10}" y="{y + 13}" text-anchor="end">{_esc(model)}</text>'
-            f'<rect x="{left}" y="{y}" width="{scale}" height="18" fill="var(--grid)" rx="3"/>'
-            f'<rect x="{left}" y="{y}" width="{x_rate - left:.1f}" height="18" fill="var(--blue)" rx="3"/>'
-            f'<line x1="{left + lo * scale:.1f}" x2="{left + hi * scale:.1f}" y1="{y + 9}" y2="{y + 9}" '
-            f'stroke="var(--ink)" stroke-width="1.5"/>'
-            f'<text x="{left + scale + 10}" y="{y + 13}">{_pct(rate)}</text>'
+        marks.append(
+            f'<text class="ink" x="{left - 12}" y="{mid}" text-anchor="end" dominant-baseline="middle">{_esc(model)}</text>'
+            f'<rect x="{left}" y="{y}" width="{scale}" height="{bar}" class="track" rx="2"/>'
+            f'<rect x="{left}" y="{y}" width="{rate * scale:.1f}" height="{bar}" class="bar" rx="2"/>'
+            f'<line x1="{left + lo * scale:.1f}" x2="{left + hi * scale:.1f}" y1="{mid}" y2="{mid}" '
+            f'class="whisker"/>'
+            f'<line x1="{left + lo * scale:.1f}" x2="{left + lo * scale:.1f}" y1="{mid - 6}" y2="{mid + 6}" class="whisker"/>'
+            f'<line x1="{left + hi * scale:.1f}" x2="{left + hi * scale:.1f}" y1="{mid - 6}" y2="{mid + 6}" class="whisker"/>'
+            f'<text class="ink" x="{left + scale + 12}" y="{mid}" dominant-baseline="middle">'
+            f'<tspan font-weight="600">{_pct(rate)}</tspan>'
+            f'<tspan class="muted" x="{left + scale + 12}" dy="15">{_pct(lo)} to {_pct(hi)}</tspan></text>'
         )
-    height = 40 + row * len(summary)
-    axis = "".join(
-        f'<line x1="{left + t * scale / 4:.1f}" x2="{left + t * scale / 4:.1f}" y1="14" y2="{height - 12}" '
-        f'stroke="var(--grid)"/><text x="{left + t * scale / 4:.1f}" y="{height - 2}" text-anchor="middle">'
-        f"{t * 25}%</text>"
+    ticks = "".join(
+        f'<line x1="{left + t * scale / 4:.1f}" x2="{left + t * scale / 4:.1f}" y1="{top}" y2="{axis_y}" class="gridline"/>'
+        f'<text class="muted" x="{left + t * scale / 4:.1f}" y="{axis_y + 16}" text-anchor="middle">{t * 25}%</text>'
         for t in range(5)
     )
+    title = (f'<text class="ink" x="{left + scale / 2:.1f}" y="{axis_y + 36}" text-anchor="middle">'
+             "Share of cells passed. Whiskers: 95% Wilson interval</text>")
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="100%" '
-            f'role="img" aria-label="Pass rate per model with 95% Wilson intervals">{axis}{"".join(rows)}</svg>')
+            f'role="img" aria-label="Pass rate per model with 95% Wilson intervals">{ticks}{"".join(marks)}{title}</svg>')
 
 
 def _leaderboard(summary: dict) -> str:
