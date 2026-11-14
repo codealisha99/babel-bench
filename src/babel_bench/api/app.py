@@ -53,6 +53,15 @@ def create_app(settings: Settings) -> FastAPI:
     def tasks(seed: int = seed_path) -> dict:
         return views.tasks(seed)
 
+    @app.get("/api/languages/{seed}/tasks/{task_id}/starter", dependencies=[read_limit])
+    def starter(seed: int = seed_path, task_id: str = Path(min_length=1, max_length=64)) -> dict:
+        task = views.find_task(task_id)
+        if task is None:
+            raise HTTPException(404, "unknown task")
+        if task.tier == "predict":
+            raise HTTPException(400, "predict tasks have no program to write")
+        return {"seed": seed, "task_id": task_id, "program": views.starter(seed, task_id)}
+
     @app.post("/api/run", dependencies=[run_limit])
     def run(body: RunRequest) -> dict:
         if len(body.program) > settings.max_program_chars:

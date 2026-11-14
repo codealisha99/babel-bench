@@ -16,6 +16,19 @@ _FENCE = re.compile(r"```[^\n]*\n(.*?)```", re.DOTALL)
 
 
 @dataclass(frozen=True)
+class TestOutcome:
+    """One hidden or visible test. Hidden tests carry no arguments, expectation or output."""
+
+    label: str  # "solve(5)" for a visible test, "hidden test 3" otherwise
+    visible: bool
+    passed: bool
+    got: str = ""
+    expected: str = ""
+    error: str | None = None
+    line: int | None = None  # 1-based line in the answer where a runtime error was raised
+
+
+@dataclass(frozen=True)
 class Grade:
     passed: bool
     tests_passed: int
@@ -23,6 +36,8 @@ class Grade:
     feedback: str
     error: str | None
     output: str
+    outcomes: tuple = ()
+    error_line: int | None = None  # 1-based line in the answer for a parse or runtime error
 
 
 def extract_code(answer: str) -> str:
@@ -55,26 +70,47 @@ def _describe_failure(idx: int, visible: int, args: tuple, error: str | None, go
     return f"A hidden test returned {got}, which is wrong."
 
 
+def _error_line(result) -> int | None:
+    return getattr(result.error, "line", 0) or None
+
+
+def _outcome(idx: int, visible: bool, test, result) -> TestOutcome:
+    passed = result.error is None and result.text.rstrip() == test.expected.rstrip()
+    if not visible:
+        return TestOutcome(f"hidden test {idx + 1}", False, passed, error=_error_text(result), line=_error_line(result))
+    return TestOutcome(
+        f"solve({_args_text(test.args)})", True, passed, got=result.text.rstrip(),
+        expected=test.expected.rstrip(), error=_error_text(result), line=_error_line(result),
+    )
+
+
+def _error_text(result) -> str | None:
+    return str(result.error) if result.error else None
+
+
 def _grade_code(spec: LanguageSpec, inst: Instance, answer: str) -> Grade:
     try:
         program = parse(extract_code(answer), spec)
     except ParseError as exc:
-        return Grade(False, 0, len(inst.tests), f"Your program has a syntax error: {exc}", str(exc), "")
-    passed_count = 0
+        return Grade(False, 0, len(inst.tests), f"Your program has a syntax error: {exc}", str(exc), "",
+                     error_line=exc.line or None)
+    outcomes = []
     first_failure = None
     for idx, test in enumerate(inst.tests):
         call = ExprStmt(Call("print", (Call("solve", tuple(value_to_expr(a) for a in test.args)),)))
         result = run_program(Program(program.body + (call,)), spec.semantics)
-        if result.error is None and result.text.rstrip() == test.expected.rstrip():
-            passed_count += 1
-        elif first_failure is None:
+        outcome = _outcome(idx, idx < len(inst.visible), test, result)
+        outcomes.append(outcome)
+        if not outcome.passed and first_failure is None:
             first_failure = (idx, test, result)
+    passed_count = sum(o.passed for o in outcomes)
     if first_failure is None:
-        return Grade(True, passed_count, len(inst.tests), "", None, "")
+        return Grade(True, passed_count, len(inst.tests), "", None, "", outcomes=tuple(outcomes))
     idx, test, result = first_failure
-    error = str(result.error) if result.error else None
+    error = _error_text(result)
     feedback = _describe_failure(idx, len(inst.visible), test.args, error, result.text, test.expected)
-    return Grade(False, passed_count, len(inst.tests), feedback, error, result.text)
+    return Grade(False, passed_count, len(inst.tests), feedback, error, result.text,
+                 outcomes=tuple(outcomes), error_line=_error_line(result))
 
 
 def grade_answer(spec: LanguageSpec, inst: Instance, answer: str) -> Grade:
