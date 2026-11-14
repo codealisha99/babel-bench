@@ -1,5 +1,7 @@
 # babel-bench
 
+[![ci](https://github.com/codealisha99/babel-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/codealisha99/babel-bench/actions/workflows/ci.yml)
+
 **Landing page:** https://babel-bench-site.vercel.app
 **Live demo:** the playground on the landing page, backed by the API at https://babel-bench-api.vercel.app (a Vercel Python function). The first attempt to host it on Railway was blocked by an expired trial, so it runs on Vercel instead.
 
