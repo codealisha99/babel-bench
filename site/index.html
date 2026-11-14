@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>babel-bench: a benchmark in languages that did not exist until the run</title>
+  <meta name="description" content="babel-bench generates a programming language from a seed, gives a model only its manual, and grades the answer by running it in the language's own interpreter.">
+  <meta property="og:title" content="babel-bench">
+  <meta property="og:description" content="A coding benchmark in programming languages generated from a seed. Models get only the manual.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#2446C4">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Models learn a language that the run invents.</h1>
+      <p class="lede">babel-bench generates a programming language from a seed, gives the model only that language's manual, and grades the answer by running it in the language's own interpreter.</p>
+      <nav class="links" aria-label="Project links">
+        <a href="#playground">Try the playground</a>
+        <a href="#evidence">See the evidence</a>
+        <a href="https://github.com/codealisha99/babel-bench">Source on GitHub</a>
+      </nav>
+    </div>
+    <figure class="specimen" aria-label="A generated program and its printed output">
+      <header><strong>Vezafra</strong> (seed 1), a predict task</header>
+      <pre>i = 1 .
+botu i &lt;= 4 poutrai
+  kepen(- (i * i) / 3) .
+  i = i + 1 .
+teevu</pre>
+      <div class="out">
+        <span>Expected output, computed by the interpreter under this language's rules</span>
+        <pre>0
+-1
+-3
+-5</pre>
+      </div>
+    </figure>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap prose">
+    <h2>Static benchmarks end up in training data.</h2>
+    <p>A coding benchmark with a fixed set of problems gets copied, discussed and trained on, then saturates. A score on it tells you how much the model has memorised.</p>
+    <p>babel-bench removes the memory route. Every run uses a language that did not exist before it. The model can reach a correct answer only by reading the manual it is given, and nothing it learned before the run contains that language.</p>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap two">
+    <div class="prose">
+      <h2>How a run works</h2>
+      <ol class="steps">
+        <li><p><strong>Generate.</strong> A seed fixes the keywords, block delimiters, operator spellings, precedence, call style, index base, division and modulo rounding, truthiness and the and/or result.</p></li>
+        <li><p><strong>Document.</strong> The manual is built from examples. Each example is written as a syntax tree, printed in the language, executed, and the output the interpreter produced is what the manual states.</p></li>
+        <li><p><strong>Ask.</strong> The model gets the manual and one task: predict the output of a program, translate a Python function, write a function from a spec, or fix a program with one injected bug.</p></li>
+        <li><p><strong>Grade.</strong> The answer is parsed by that language's own parser and run against hidden tests in the interpreter. The interpreter has step, depth, size, output and time limits.</p></li>
+      </ol>
+    </div>
+    <div class="prose">
+      <h2>One seed, many languages</h2>
+      <p>These are the randomised rules of Vezafra, the language from the specimen. Another seed changes them.</p>
+      <dl class="features">
+        <dt>Index base</dt><dd>0-based</dd>
+        <dt>Integer division</dt><dd>rounds toward zero</dd>
+        <dt>Modulo sign</dt><dd>follows divisor</dd>
+        <dt>Zero is</dt><dd>false</dd>
+        <dt>Empty collection is</dt><dd>false</dd>
+        <dt>and / or result</dt><dd>boolean</dd>
+        <dt>Precedence</dt><dd>permuted</dd>
+        <dt>Blocks</dt><dd>keyword pair</dd>
+        <dt>Terminator</dt><dd>semicolon-style</dd>
+      </dl>
+      <p class="note">Source: <code>babel-bench show --seed 1</code>, run in this repository.</p>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="wrap two">
+    <div class="prose">
+      <h2>Architecture</h2>
+      <p>One shared AST and one interpreter give the meaning of every program. Each generated language has its own lexer, parser and printer, so a grammar bug cannot change what a program means.</p>
+      <p>The model is an adapter. Anthropic, any OpenAI-compatible endpoint, any shell command, a perfect oracle and a naive baseline all plug into the same harness, which resumes finished cells and writes one JSON line per cell.</p>
+    </div>
+    <div>
+      <svg class="diagram" viewBox="0 0 360 600" role="img" aria-labelledby="arch-title arch-desc">
+        <title id="arch-title">Pipeline from seed to report</title>
+        <desc id="arch-desc">A seed defines a language spec. The spec drives the manual, the printer and parser, and the task templates. The model receives the manual and a task. The grader parses the answer and runs hidden tests in the interpreter. Results are written to JSONL and rendered as an HTML report.</desc>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#53605A"/>
+          </marker>
+        </defs>
+        <g stroke="#15201C" stroke-width="1.2" fill="#FBFCFA">
+          <rect x="20" y="10" width="320" height="50" rx="3"/>
+          <rect x="20" y="92" width="320" height="50" rx="3"/>
+          <rect x="20" y="174" width="155" height="66" rx="3"/>
+          <rect x="185" y="174" width="155" height="66" rx="3"/>
+          <rect x="20" y="272" width="320" height="50" rx="3"/>
+          <rect x="20" y="354" width="320" height="50" rx="3"/>
+          <rect x="20" y="436" width="155" height="50" rx="3" fill="#E5EAE4"/>
+          <rect x="185" y="436" width="155" height="50" rx="3"/>
+          <rect x="20" y="524" width="320" height="50" rx="3"/>
+        </g>
+        <g stroke="#53605A" stroke-width="1.2" fill="none" marker-end="url(#arrow)">
+          <path d="M180 60 V92"/>
+          <path d="M180 142 V158 H97 V174"/>
+          <path d="M180 142 V158 H262 V174"/>
+          <path d="M97 240 V256 H180 V272"/>
+          <path d="M262 240 V256 H180 V272"/>
+          <path d="M180 322 V354"/>
+          <path d="M180 404 V420 H97 V436"/>
+          <path d="M180 404 V420 H262 V436"/>
+          <path d="M262 486 V500 H180 V524"/>
+        </g>
+        <g>
+          <text x="180" y="40" text-anchor="middle">seed, then spec.py</text>
+          <text x="180" y="122" text-anchor="middle">spec: syntax and semantics</text>
+          <text x="97" y="201" text-anchor="middle">manual.py</text>
+          <text x="97" y="219" text-anchor="middle" class="small">executed examples</text>
+          <text x="262" y="201" text-anchor="middle">printer and parser</text>
+          <text x="262" y="219" text-anchor="middle" class="small">one AST, per language</text>
+          <text x="180" y="302" text-anchor="middle">tasks: 24 templates</text>
+          <text x="180" y="384" text-anchor="middle">model: manual + task only</text>
+          <text x="97" y="466" text-anchor="middle">interp.py</text>
+          <text x="262" y="466" text-anchor="middle">grade.py</text>
+          <text x="180" y="554" text-anchor="middle">results.jsonl, then report.html</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap prose">
+    <h2>Evidence</h2>
+    <p>Everything below was produced by commands in this repository. Nothing is a leaderboard.</p>
+
+    <h3>Keyless demo: oracle and naive baselines</h3>
+    <p>Three languages (seeds 1 to 3), all 24 tasks, one attempt. The oracle is given the reference answer, so 100% checks the plumbing, not the model. The naive baseline writes Python syntax, which no generated language accepts, so its score is a floor.</p>
+    <table class="table">
+      <thead><tr><th>Baseline</th><th class="num">Passed</th></tr></thead>
+      <tbody>
+        <tr><td>oracle</td><td class="num pass">72 / 72</td></tr>
+        <tr><td>naive (Python syntax)</td><td class="num fail">0 / 72</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Output of <code>uv run babel-bench demo</code>, unedited:</p>
+    <pre class="replay">72 cells (3 languages x 24 tasks)
+oracle: recorded 72, already done 0, model errors 0, errored cells 0
+naive: recorded 72, already done 0, model errors 0, errored cells 0
+results: runs/demo/results.jsonl
+wrote runs/demo/report.html from 144 records
+  oracle                                   72/72 passed
+  naive                                    0/72 passed
+open runs/demo/report.html</pre>
+    <p><a href="evidence/demo-report.html">Open the full demo report</a>.</p>
+    <iframe class="report-frame" src="evidence/demo-report.html" title="babel-bench demo report, generated by the demo command"></iframe>
+
+    <h3>A real model, five tasks</h3>
+    <p>This is a <strong>five-task sanity sample</strong>, not a ranking. It is one language (seed 1, Vezafra), one attempt per task, and five calls to Claude Haiku through the <code>claude -p --model haiku</code> command adapter. It shows the live path works end to end. It says nothing about harder tiers or other languages.</p>
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Task</th><th>Tier</th><th class="num">Result</th><th class="num">Hidden tests</th></tr></thead>
+      <tbody>
+        <tr><td>predict.squares</td><td>predict</td><td class="num pass">pass</td><td class="num">1 of 1</td></tr>
+        <tr><td>translate.gcd</td><td>translate</td><td class="num pass">pass</td><td class="num">5 of 5</td></tr>
+        <tr><td>write.sum_to</td><td>write</td><td class="num pass">pass</td><td class="num">6 of 6</td></tr>
+        <tr><td>write.reverse</td><td>write</td><td class="num pass">pass</td><td class="num">4 of 4</td></tr>
+        <tr><td>fix.count_digits</td><td>fix</td><td class="num pass">pass</td><td class="num">6 of 6</td></tr>
+      </tbody>
+    </table></div>
+    <p><a href="evidence/haiku-sample-report.html">Open the sample report</a>, which includes every prompt and answer.</p>
+  </div>
+</section>
+
+<section id="playground">
+  <div class="wrap">
+    <div class="prose">
+      <h2>Playground</h2>
+      <p>Pick a seed or roll one, read that language's manual, then write a program for a code task. The program is parsed and run by the same interpreter the benchmark uses, against hidden tests. You get pass or fail, the feedback the harness would give a model, and what your program prints.</p>
+      <p class="note">Predict tasks are not graded here. Read the program and work out its output yourself.</p>
+    </div>
+    <div class="play" style="margin-top:2rem">
+      <div class="panel">
+        <div class="controls">
+          <label>Seed
+            <input id="seed" type="number" min="0" max="99999" value="1" inputmode="numeric">
+          </label>
+          <button type="button" id="roll" class="quiet">Random seed</button>
+          <button type="button" id="load">Load language</button>
+        </div>
+        <p id="lang-name" class="status" aria-live="polite"></p>
+        <pre id="manual" class="manual" tabindex="0" aria-label="Reference manual"></pre>
+      </div>
+      <div class="panel">
+        <div class="controls">
+          <label>Task
+            <select id="task" disabled><option>Load a language first</option></select>
+          </label>
+        </div>
+        <p id="task-statement" class="note"></p>
+        <label style="margin-top:.75rem">Your program
+          <textarea id="program" maxlength="8000" spellcheck="false" aria-describedby="program-help" disabled></textarea>
+        </label>
+        <p id="program-help" class="note">Up to 8,000 characters. Reply format: the program only, optionally in a fenced block.</p>
+        <div class="controls"><button type="button" id="run" disabled>Run against hidden tests</button></div>
+        <div id="result" class="result" aria-live="polite"></div>
+      </div>
+    </div>
+    <p id="api-status" class="status offline" role="status" hidden></p>
+  </div>
+</section>
+
+<section id="limits">
+  <div class="wrap prose">
+    <h2>Limitations</h2>
+    <ul class="limits">
+      <li>One small live sample. The Anthropic and OpenAI-compatible adapters are implemented, but they have not been run against a live endpoint.</li>
+      <li>24 templates. Tasks are small and do not yet span several functions.</li>
+      <li>Confidence intervals treat cells as independent. Cells that share a language or task are correlated, so the intervals are optimistic.</li>
+      <li>Two call styles, not three. Infix call syntax is not generated.</li>
+      <li>The interpreter runs in-process for grading. A language with host-facing features would need a sandboxed subprocess.</li>
+      <li>Known gap: in newline-terminated languages, <code>else</code> and the block opener must share a line with the statement. A model that writes Allman-style braces gets a parse error.</li>
+      <li>The playground API is not deployed yet (see the notice above). Its guards are tested locally, not on a public host.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>babel-bench, MIT licensed. <a href="https://github.com/codealisha99/babel-bench">Source</a> &middot; <a href="evidence/demo-report.html">Demo report</a> &middot; <a href="evidence/haiku-sample-report.html">Sample report</a></p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>

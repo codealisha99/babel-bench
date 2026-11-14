@@ -1,0 +1,8 @@
+72 cells (3 languages x 24 tasks)
+oracle: recorded 72, already done 0, model errors 0, errored cells 0
+naive: recorded 72, already done 0, model errors 0, errored cells 0
+results: runs/demo/results.jsonl
+wrote runs/demo/report.html from 144 records
+  oracle                                   72/72 passed
+  naive                                    0/72 passed
+open runs/demo/report.html

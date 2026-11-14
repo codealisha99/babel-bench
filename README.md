@@ -1,5 +1,8 @@
 # babel-bench
 
+**Landing page:** https://babel-bench-site.vercel.app
+**Live demo:** none. The playground API is written and tested locally (`src/babel_bench/api/`), but its Railway deploy was blocked by a plan limit ("Your trial has expired"), so nothing is hosted yet.
+
 **A coding and reasoning benchmark built on programming languages that did not exist until the run.**
 SWE-bench-style suites leak into training data and saturate. babel-bench generates a brand-new language
 from a seed (its keywords, block delimiters, operator spellings, precedence, call style, indexing base,
@@ -72,7 +75,7 @@ Requires [uv](https://docs.astral.sh/uv/). Python 3.12 is pinned by `.python-ver
 
 ```bash
 make install        # uv sync
-make test           # 418 tests, about 5 s, hermetic (no network, no keys)
+make test           # 457 tests, about 6 s, hermetic (no network, no keys)
 make demo           # keyless: 3 languages, oracle + naive baselines, HTML report
 open runs/demo/report.html
 ```
@@ -97,10 +100,34 @@ uv run babel-bench run --seeds 1-5 --model "openai:http://localhost:11434/v1|qwe
 uv run babel-bench report runs/x.jsonl --out runs/x.html
 ```
 
+## Playground API
+
+`babel-bench` also ships a small HTTP API (`src/babel_bench/api/`) used by the landing page playground:
+
+```bash
+uv run uvicorn babel_bench.api.app:app --port 8000
+curl localhost:8000/api/languages/1           # name, features, manual
+curl localhost:8000/api/languages/1/tasks     # tasks; no reference answers, no hidden tests
+curl -X POST localhost:8000/api/run -H 'Content-Type: application/json' \
+     -d '{"seed":1,"task_id":"write.sum_to","program":"..."}'   # code tasks only
+```
+
+Safety: the grader runs in a worker process (`python -I -m babel_bench.api.worker`) that the API kills after
+10 seconds, with a 1 GB address-space cap. The worker runs only the interpreter, which has no host access.
+Request bodies are capped at 16 KB and must carry a Content-Length, programs at 8,000 characters, seeds are
+0 to 99,999, and per-IP sliding-window limits apply (20 runs and 120 reads a minute). At most 3 grading runs
+execute at once. CORS allows only `BABEL_ALLOWED_ORIGINS`. Client IP comes from the last `X-Forwarded-For`
+entry, which assumes one trusted proxy hop. Predict tasks are not graded here, because checking an answer
+would reveal it.
+
+The landing page lives in `site/` (static HTML, CSS and a small script). `site/evidence/` holds the real
+demo report, the sample report and the demo output.
+
 ## Sample: a real small run (Claude Haiku, via the `command` adapter)
 
 This is a **small sample, not a leaderboard**: one generated language (seed 1, "Vezafra"), five tasks, one
-attempt each, five model calls in total. The model was `claude -p --model haiku`, invoked through the
+attempt each, five model calls in total. The sample was re-run after the predict templates and the manual
+changed, so its prompts match the current code. The model was `claude -p --model haiku`, invoked through the
 `command` adapter. Files: `samples/haiku-sample/results.jsonl` (raw records, including prompts and answers)
 and `samples/haiku-sample/report.html`.
 
@@ -147,7 +174,7 @@ Keyless reference points on the same kind of run: oracle 72/72, naive Python-syn
 
 Commands run during the build, with their results:
 
-- `uv run pytest -q`: **418 passed** (about 5 s). It covers:
+- `uv run pytest -q`: **457 passed** (about 6 s). It covers:
   - round trips: reference programs for every seed, plus random expression trees;
   - manual examples execute to their stated output, for 60 seeds;
   - interpreter limits: infinite loop, unbounded recursion, runaway list growth, error line numbers;
@@ -174,23 +201,17 @@ Commands run during the build, with their results:
   intervals are optimistic. A clustered bootstrap by language is the right next step.
 - The interpreter runs in-process. Moving grading into a subprocess with OS-level limits is the path if the
   language ever gets host-facing features.
-- Known gaps found in review, not yet fixed:
+- Known gaps, not yet fixed:
   - In newline-terminated languages `else` and the block opener must share a line with the statement
     (`} else {`, `if x {`). The manual now says so, but a model writing Allman-style braces gets a parse error.
     Accepting a newline before them in the parser would remove that penalty.
-  - `predict.squares` and `predict.recursion` print the same output for every seed and use no
-    language-specific semantics, so they can be answered without the manual.
-  - Lists compare with Python equality, so `[1] == [true]` is `true`. Integer literals may exceed the
-    arithmetic overflow bound (2^63) that arithmetic enforces.
-  - The grader catches only model-side errors per cell; an unexpected exception in a grader or adapter path
-    still aborts the whole run. The known grader crash (oversized integer literal) is fixed.
-  - The CLI calls the tier `read` (`--task read`), while the README calls it `predict`. Bad model names and
-    missing report inputs print tracebacks rather than messages.
+  - The playground API is tested locally only (see Playground API below).
 
 ## Layout
 
 ```
 src/babel_bench/
+  api/           playground API: app, worker, sandbox, guards, views
   core.py        shared AST                   spec.py      language generator
   syntax.py      lexer + parser               printer.py   pretty-printer (+ naive Python emitter)
   interp.py      interpreter with limits      manual.py    manual with executed examples
@@ -200,4 +221,5 @@ src/babel_bench/
   cli.py         command line
 tests/           property, interpreter, task and harness tests
 samples/         the real Haiku sample (results + report)
+site/            landing page (static) and evidence/ copies of the reports
 ```
