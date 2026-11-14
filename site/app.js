@@ -1,6 +1,6 @@
-// Playground. API_BASE is the origin of the babel-bench API. Empty means "not deployed":
-// the controls stay disabled and the page says so. Responses are written with textContent only.
-const API_BASE = "";
+// Playground. API_BASE is the babel-bench API, a Vercel Python function. Responses are written with
+// textContent only. If the API cannot be reached, the playground says so and the evidence stays readable.
+const API_BASE = "https://babel-bench-api.vercel.app";
 const MAX_SEED = 99999;
 
 const $ = (id) => document.getElementById(id);
@@ -69,7 +69,7 @@ async function loadLanguage() {
   }
   if (!apiAvailable()) {
     els.langName.textContent = "";
-    setStatus("The playground API is not deployed yet, so languages cannot be loaded here. The evidence section above is the real output of the benchmark.");
+    setStatus("The playground API is unavailable. Run the benchmark locally with babel-bench show --seed N --manual.");
     return;
   }
   try {
@@ -139,5 +139,5 @@ els.run.addEventListener("click", runProgram);
 if (!apiAvailable()) {
   els.load.disabled = true;
   els.roll.disabled = true;
-  setStatus("The playground API is not deployed yet. The manual and grading controls will work once it is.");
+  setStatus("The playground API is not configured on this page.");
 }

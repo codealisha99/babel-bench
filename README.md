@@ -1,7 +1,7 @@
 # babel-bench
 
 **Landing page:** https://babel-bench-site.vercel.app
-**Live demo:** none. The playground API is written and tested locally (`src/babel_bench/api/`), but its Railway deploy was blocked by a plan limit ("Your trial has expired"), so nothing is hosted yet.
+**Live demo:** the playground on the landing page, backed by the API at https://babel-bench-api.vercel.app (a Vercel Python function). The first attempt to host it on Railway was blocked by an expired trial, so it runs on Vercel instead.
 
 **A coding and reasoning benchmark built on programming languages that did not exist until the run.**
 SWE-bench-style suites leak into training data and saturate. babel-bench generates a brand-new language
@@ -114,11 +114,26 @@ curl -X POST localhost:8000/api/run -H 'Content-Type: application/json' \
 
 Safety: the grader runs in a worker process (`python -I -m babel_bench.api.worker`) that the API kills after
 10 seconds, with a 1 GB address-space cap. The worker runs only the interpreter, which has no host access.
+The interpreter's own limits (200,000 steps, 2 seconds per run, 100,000-character strings, 10,000-item lists)
+normally stop a bad program first.
 Request bodies are capped at 16 KB and must carry a Content-Length, programs at 8,000 characters, seeds are
 0 to 99,999, and per-IP sliding-window limits apply (20 runs and 120 reads a minute). At most 3 grading runs
-execute at once. CORS allows only `BABEL_ALLOWED_ORIGINS`. Client IP comes from the last `X-Forwarded-For`
-entry, which assumes one trusted proxy hop. Predict tasks are not graded here, because checking an answer
-would reveal it.
+execute at once. CORS allows only `BABEL_ALLOWED_ORIGINS`. Predict tasks are not graded here, because checking
+an answer would reveal it.
+
+**Deploying.** Vercel (`api/index.py`, `vercel.json`): the function runs `babel_bench.api.app:app` with a
+20-second `maxDuration` as a backstop behind the 10-second worker kill. On Vercel the client IP comes from
+`x-vercel-forwarded-for`, which is trusted only when the `VERCEL` variable is set. Elsewhere the last
+`X-Forwarded-For` entry is used, which assumes one trusted proxy hop. The rate limits and the concurrency cap
+live in memory, so they are **per function instance**. A burst spread over many instances is limited less
+than in a single container. The per-request limits (kill timeout, memory cap, interpreter limits, body size)
+do not depend on instance state. Self-hosting: `docker build -t babel-bench-api . && docker run -p 8000:8000 babel-bench-api`.
+
+Checked on the deployed Vercel URL: a program that loops forever returns a step-limit error in about 1.3 seconds.
+A memory-hungry program hits the string limit with a clean error. Oversize bodies get 413, and CORS allows the
+landing origin and refuses another. A throwaway probe function (since removed) confirmed on the same runtime
+that `subprocess.run(timeout=2)` kills a sleeping child after 2.0 seconds, and that an address-space cap of
+1 GB makes a child's 4 GB allocation raise `MemoryError` without affecting the function.
 
 The landing page lives in `site/` (static HTML, CSS and a small script). `site/evidence/` holds the real
 demo report, the sample report and the demo output.
@@ -219,6 +234,7 @@ src/babel_bench/
   prompt.py      prompt construction          models.py    adapters and baselines
   runner.py      harness                      report.py    static HTML report
   cli.py         command line
+  api/           playground API (app, worker, sandbox, guards); api/index.py is the Vercel entry point
 tests/           property, interpreter, task and harness tests
 samples/         the real Haiku sample (results + report)
 site/            landing page (static) and evidence/ copies of the reports

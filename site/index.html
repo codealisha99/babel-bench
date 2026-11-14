@@ -230,7 +230,7 @@ open runs/demo/report.html</pre>
       <li>Two call styles, not three. Infix call syntax is not generated.</li>
       <li>The interpreter runs in-process for grading. A language with host-facing features would need a sandboxed subprocess.</li>
       <li>Known gap: in newline-terminated languages, <code>else</code> and the block opener must share a line with the statement. A model that writes Allman-style braces gets a parse error.</li>
-      <li>The playground API is not deployed yet (see the notice above). Its guards are tested locally, not on a public host.</li>
+      <li>The playground API runs as a Vercel Python function. Its per-IP rate limits and concurrency cap live in each function instance, so they are weaker than in a long-running container. The hard per-request limits (wall-clock kill, memory cap, interpreter step and time limits) do not depend on instance state.</li>
     </ul>
   </div>
 </section>
