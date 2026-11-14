@@ -72,7 +72,7 @@ Requires [uv](https://docs.astral.sh/uv/). Python 3.12 is pinned by `.python-ver
 
 ```bash
 make install        # uv sync
-make test           # 337 tests, about 6 s, hermetic (no network, no keys)
+make test           # 418 tests, about 5 s, hermetic (no network, no keys)
 make demo           # keyless: 3 languages, oracle + naive baselines, HTML report
 open runs/demo/report.html
 ```
@@ -133,9 +133,11 @@ Keyless reference points on the same kind of run: oracle 72/72, naive Python-syn
 - **Limits are in-process, not in a subprocess.** The language cannot reach the host, so the only risks are
   CPU, memory and recursion, and the interpreter bounds all three. If the language ever gains I/O, grading
   must move into a sandboxed subprocess with `RLIMIT_AS` and a hard timeout.
-- **Baselines are labelled honestly.** The oracle is given the reference answer. The naive baseline is given
-  the Python translation of the reference, so it shows that knowing the algorithm is not enough. Naive
-  predict answers are empty, so that tier's naive score is a floor, not a measurement of Python-prior knowledge.
+- **Baselines are labelled honestly.** The oracle is given the reference answer. The naive baseline answers
+  in Python syntax, which no generated language accepts (the lexer rejects `:` in every language), so its
+  0/72 says only that Python syntax fails. It does not measure whether a model knows the algorithm. A fair
+  naive baseline would re-spell the reference in the target language's keywords. Naive predict answers are
+  empty, so that tier's naive score is a floor.
 - **Cells, not tasks, are the unit of resume.** A cell is one (model, language, task). Model errors are not
   recorded, so rerunning retries them.
 - **Immutability and small modules.** Specs, ASTs, instances and records are frozen dataclasses or plain
@@ -145,7 +147,7 @@ Keyless reference points on the same kind of run: oracle 72/72, naive Python-syn
 
 Commands run during the build, with their results:
 
-- `uv run pytest -q`: **337 passed** (about 6 s). It covers:
+- `uv run pytest -q`: **418 passed** (about 5 s). It covers:
   - round trips: reference programs for every seed, plus random expression trees;
   - manual examples execute to their stated output, for 60 seeds;
   - interpreter limits: infinite loop, unbounded recursion, runaway list growth, error line numbers;
@@ -172,6 +174,18 @@ Commands run during the build, with their results:
   intervals are optimistic. A clustered bootstrap by language is the right next step.
 - The interpreter runs in-process. Moving grading into a subprocess with OS-level limits is the path if the
   language ever gets host-facing features.
+- Known gaps found in review, not yet fixed:
+  - In newline-terminated languages `else` and the block opener must share a line with the statement
+    (`} else {`, `if x {`). The manual now says so, but a model writing Allman-style braces gets a parse error.
+    Accepting a newline before them in the parser would remove that penalty.
+  - `predict.squares` and `predict.recursion` print the same output for every seed and use no
+    language-specific semantics, so they can be answered without the manual.
+  - Lists compare with Python equality, so `[1] == [true]` is `true`. Integer literals may exceed the
+    arithmetic overflow bound (2^63) that arithmetic enforces.
+  - The grader catches only model-side errors per cell; an unexpected exception in a grader or adapter path
+    still aborts the whole run. The known grader crash (oversized integer literal) is fixed.
+  - The CLI calls the tier `read` (`--task read`), while the README calls it `predict`. Bad model names and
+    missing report inputs print tracebacks rather than messages.
 
 ## Layout
 
