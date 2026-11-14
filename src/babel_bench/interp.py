@@ -30,6 +30,9 @@ class Limits:
     max_seconds: float = 2.0
 
 
+DEFAULT_LIMITS = Limits()
+
+
 class LangError(Exception):
     """A runtime error. kind is 'runtime' (the program's fault) or 'limit' (a bound was hit)."""
 
@@ -88,7 +91,7 @@ def _kind(v) -> str:
 
 
 class Interpreter:
-    def __init__(self, sem: Semantics, limits: Limits = Limits()) -> None:
+    def __init__(self, sem: Semantics, limits: Limits = DEFAULT_LIMITS) -> None:
         self.sem = sem
         self.limits = limits
         self.steps = 0
@@ -307,7 +310,7 @@ class Interpreter:
         return tuple(self.output)
 
 
-def run_program(program: Program, sem: Semantics, limits: Limits = Limits()) -> RunResult:
+def run_program(program: Program, sem: Semantics, limits: Limits = DEFAULT_LIMITS) -> RunResult:
     """Run to completion or to the first error; never raises for program faults."""
     interp = Interpreter(sem, limits)
     try:
