@@ -3,10 +3,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>babel-bench report</title><style>
 :root { color-scheme: light; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
-  --grid:#e1e0d9; --axis:#c3c2b7; --blue:#2a78d6; --blue-soft:#cde2fb; --blue-deep:#104281; }
+  --grid:#e1e0d9; --axis:#c3c2b7; --blue:#2a78d6; --blue-soft:#cde2fb; --blue-deep:#104281; --track:#efeee9; }
 @media (prefers-color-scheme: dark) { :root { color-scheme: dark; --surface:#1a1a19; --ink:#f0efec;
   --ink2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835; --blue:#3987e5; --blue-soft:#1c5cab;
-  --blue-deep:#9ec5f4; } }
+  --blue-deep:#9ec5f4; --track:#252523; } }
 * { box-sizing: border-box; }
 body { margin:0; background:var(--surface); color:var(--ink);
   font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
@@ -27,20 +27,23 @@ summary { cursor: pointer; font-variant-numeric: tabular-nums; }
 pre { background: rgba(0,0,0,0.04); padding: 10px 12px; border-radius: 6px; overflow-x: auto;
   font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; }
 .note { color: var(--ink2); font-size: 13px; }
-svg text { font: 12px -apple-system, Helvetica, Arial, sans-serif; fill: var(--ink2); }
+svg text { font: 13px -apple-system, Helvetica, Arial, sans-serif; fill: var(--ink2); }
+svg rect.track { fill: var(--track); } svg rect.bar { fill: var(--blue); }
+svg line.whisker { stroke: var(--ink); stroke-width: 1.5; } svg line.gridline { stroke: var(--grid); }
+svg text.ink { fill: var(--ink); } svg text.muted { fill: var(--muted); font-size: 12px; }
 </style></head>
 <body><main>
 <h1>babel-bench</h1>
 <p class="lede">Models write and fix programs in programming languages they have never seen, using only a
 generated reference manual. Each language is derived from a seed, so no model has trained on it.</p>
 <p class="meta">3 generated language(s) &middot; 24 task(s) &middot;
-144 cell(s) &middot; generated 2026-11-14 19:44 UTC</p>
+144 cell(s) &middot; generated 2026-11-14 20:12 UTC</p>
 
 <h2>Leaderboard</h2>
 <table><thead><tr><th>Model</th><th class='num'>Passed</th><th class='num'>Score (95% CI)</th><th class='num'>Tokens</th><th class='num'>Cost</th></tr></thead><tbody><tr><td>oracle</td><td class='num'>72/72</td><td class='num'><strong>100.0%</strong> <span class='ci'>[94.9%, 100.0%]</span></td><td class='num'>0</td><td class='num'>n/a</td></tr><tr><td>naive</td><td class='num'>0/72</td><td class='num'><strong>0.0%</strong> <span class='ci'>[0.0%, 5.1%]</span></td><td class='num'>0</td><td class='num'>n/a</td></tr></tbody></table>
 <p class="note">Score = share of cells passed (any attempt). Intervals are 95% Wilson intervals over cells.
 Cells are not independent across tasks within a language, so treat small differences with care.</p>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 108" width="100%" role="img" aria-label="Pass rate per model with 95% Wilson intervals"><line x1="150.0" x2="150.0" y1="14" y2="96" stroke="var(--grid)"/><text x="150.0" y="106" text-anchor="middle">0%</text><line x1="280.0" x2="280.0" y1="14" y2="96" stroke="var(--grid)"/><text x="280.0" y="106" text-anchor="middle">25%</text><line x1="410.0" x2="410.0" y1="14" y2="96" stroke="var(--grid)"/><text x="410.0" y="106" text-anchor="middle">50%</text><line x1="540.0" x2="540.0" y1="14" y2="96" stroke="var(--grid)"/><text x="540.0" y="106" text-anchor="middle">75%</text><line x1="670.0" x2="670.0" y1="14" y2="96" stroke="var(--grid)"/><text x="670.0" y="106" text-anchor="middle">100%</text><text x="140" y="33" text-anchor="end">oracle</text><rect x="150" y="20" width="520" height="18" fill="var(--grid)" rx="3"/><rect x="150" y="20" width="520.0" height="18" fill="var(--blue)" rx="3"/><line x1="643.7" x2="670.0" y1="29" y2="29" stroke="var(--ink)" stroke-width="1.5"/><text x="680" y="33">100.0%</text><text x="140" y="67" text-anchor="end">naive</text><rect x="150" y="54" width="520" height="18" fill="var(--grid)" rx="3"/><rect x="150" y="54" width="0.0" height="18" fill="var(--blue)" rx="3"/><line x1="150.0" x2="176.3" y1="63" y2="63" stroke="var(--ink)" stroke-width="1.5"/><text x="680" y="67">0.0%</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 138" width="100%" role="img" aria-label="Pass rate per model with 95% Wilson intervals"><line x1="170.0" x2="170.0" y1="8" y2="92" class="gridline"/><text class="muted" x="170.0" y="108" text-anchor="middle">0%</text><line x1="275.0" x2="275.0" y1="8" y2="92" class="gridline"/><text class="muted" x="275.0" y="108" text-anchor="middle">25%</text><line x1="380.0" x2="380.0" y1="8" y2="92" class="gridline"/><text class="muted" x="380.0" y="108" text-anchor="middle">50%</text><line x1="485.0" x2="485.0" y1="8" y2="92" class="gridline"/><text class="muted" x="485.0" y="108" text-anchor="middle">75%</text><line x1="590.0" x2="590.0" y1="8" y2="92" class="gridline"/><text class="muted" x="590.0" y="108" text-anchor="middle">100%</text><text class="ink" x="158" y="17.0" text-anchor="end" dominant-baseline="middle">oracle</text><rect x="170" y="8" width="420" height="18" class="track" rx="2"/><rect x="170" y="8" width="420.0" height="18" class="bar" rx="2"/><line x1="568.7" x2="590.0" y1="17.0" y2="17.0" class="whisker"/><line x1="568.7" x2="568.7" y1="11.0" y2="23.0" class="whisker"/><line x1="590.0" x2="590.0" y1="11.0" y2="23.0" class="whisker"/><text class="ink" x="602" y="17.0" dominant-baseline="middle"><tspan font-weight="600">100.0%</tspan><tspan class="muted" x="602" dy="15">94.9% to 100.0%</tspan></text><text class="ink" x="158" y="57.0" text-anchor="end" dominant-baseline="middle">naive</text><rect x="170" y="48" width="420" height="18" class="track" rx="2"/><rect x="170" y="48" width="0.0" height="18" class="bar" rx="2"/><line x1="170.0" x2="191.3" y1="57.0" y2="57.0" class="whisker"/><line x1="170.0" x2="170.0" y1="51.0" y2="63.0" class="whisker"/><line x1="191.3" x2="191.3" y1="51.0" y2="63.0" class="whisker"/><text class="ink" x="602" y="57.0" dominant-baseline="middle"><tspan font-weight="600">0.0%</tspan><tspan class="muted" x="602" dy="15">0.0% to 5.1%</tspan></text><text class="ink" x="380.0" y="128" text-anchor="middle">Share of cells passed. Whiskers: 95% Wilson interval</text></svg>
 
 <h2>By tier</h2>
 <table><thead><tr><th>Tier</th><th class='num'>oracle</th><th class='num'>naive</th></tr></thead><tbody><tr><td>Predict output</td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.72)">18/18 &middot; 100.0%</span></td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.12)">0/18 &middot; 0.0%</span></td></tr><tr><td>Translate</td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.72)">18/18 &middot; 100.0%</span></td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.12)">0/18 &middot; 0.0%</span></td></tr><tr><td>Write</td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.72)">18/18 &middot; 100.0%</span></td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.12)">0/18 &middot; 0.0%</span></td></tr><tr><td>Fix</td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.72)">18/18 &middot; 100.0%</span></td><td class='num'><span class="cell" style="background:rgba(42,120,214,0.12)">0/18 &middot; 0.0%</span></td></tr></tbody></table>
